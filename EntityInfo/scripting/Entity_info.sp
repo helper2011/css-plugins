@@ -1,6 +1,14 @@
 #include <sourcemod>
 #include <sdktools>
 
+public Plugin myinfo = 
+{
+	name		= "Entity info",
+	version		= "1.0",
+	description	= "",
+	author		= "hEl"
+};
+
 public void OnPluginStart()
 {
 	RegAdminCmd("entity_list", EntityList, ADMFLAG_RCON);
@@ -13,8 +21,6 @@ public void OnPluginStart()
 	RegAdminCmd("getentmodel", GetEntityModel, ADMFLAG_RCON);
 
 }
-
-
 
 public Action GetEntityModel(int iClient, int iArgs)
 {
@@ -225,9 +231,9 @@ public Action EntityList(int iClient, int iArgs)
 	if(iArgs == 0)
 	{
 		int iEntities = GetMaxEntities();
-		for(int i = MaxClients + 1; i <= iEntities; i++)
+		for(int i; i <= iEntities; i++)
 		{
-			if(IsValidEdict(i)) 
+			if(IsValidEntity(i)) 
 			{
 				GetPropInfo(iClient, i);
 			}
