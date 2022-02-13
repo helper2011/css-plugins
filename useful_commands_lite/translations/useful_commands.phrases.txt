@@ -1,0 +1,33 @@
+"Phrases"
+{
+	"Useful commands menu title"
+	{
+		"ru"		"Полезные команды:"
+		"en"		"Useful commands:"
+	}
+	"Back"
+	{
+		"ru"		"Назад"
+		"en"		"Back"
+	}
+	"Exit"
+	{
+		"ru"		"Выход"
+		"en"		"Exit"
+	}
+	"sm_comms"
+	{
+		"ru"		"!comms\nИнформация о ваших мутах"
+		"en"		"!comms\nInfo about your mutes"
+	}
+	"sm_nominate"
+	{
+		"ru"		"!nominate\nДобавление карты в номинацию"
+		"en"		"!nominate\nAdding a map to a nomination"
+	}
+	"sm_rtv"
+	{
+		"ru"		"!rtv\nПроголосовать за смену карты"
+		"en"		"!rtv\nVote for map change"
+	}
+}

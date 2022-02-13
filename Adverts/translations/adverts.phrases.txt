@@ -1,0 +1,13 @@
+"Phrases"
+{
+	"Discord"
+	{
+		"ru"	"{TAG} {C1}Присоединяйся к нашему Discord-каналу и будь вкурсе всех новостей! {C2}discord.gg/123"
+		"en"	"{TAG} {C1}Join our Discord Channel for all the news!: {C2}discord.gg/123"
+		"hu"	"{TAG} {C1}Csatlakozzon a Discord Channelhez: {C2}discord.gg/123"
+		"de"	"{TAG} {C1}Treten Sie dem Discord Channel bei: {C2}discord.gg/123"
+		"fr"	"{TAG} {C1}Rejoignez la chaîne Discord: {C2}discord.gg/123"
+		"es"	"{TAG} {C1}Únase al canal Discord: {C2}discord.gg/123"
+		"chi"	"{TAG} {C1}加入Discord频道： {C2}discord.gg/123"
+	}
+}

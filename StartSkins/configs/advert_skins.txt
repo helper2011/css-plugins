@@ -1,0 +1,2 @@
+models/player/vad36bad_santa/santa_b.mdl=3
+models/player/vad36bad_santa/santa.mdl=2

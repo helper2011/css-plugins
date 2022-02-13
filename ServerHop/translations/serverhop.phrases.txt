@@ -1,0 +1,27 @@
+"Phrases"
+{
+	"SelectServer"
+	{
+		"en"		"Select a server to join ..."
+		"ru"		"Выберите желаемый сервер ..."
+	}
+	"HopNotification"
+	{
+		"#format"	"{1:N},{2:s}"
+		"en"		"{1} has hopped to {2} !"
+		"ru"		"{1} подключается на {2} !"
+	}
+	"Advert"
+	{
+		"#format"	"{1:s}"
+		"en"		"{1} [type !servers to join]"
+		"ru"		"{1} [!servers - подключиться]"
+	}
+	"Ask menu title"
+	{
+		"#format"	"{1:s}"
+		"en"		"{1}\nDo you want to connect?"
+		"ru"		"{1}\nЖелаете ли вы подключиться?"
+	
+	}
+}

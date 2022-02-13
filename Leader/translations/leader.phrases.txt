@@ -1,0 +1,111 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"ru"		"[Лидер]"
+		"en"		"[Leader]"
+	}
+	"Client got the lead"
+	{
+		"#format"	"{1:N},{2:N}"
+		"ru"		"{2}: {1} получил доступ к Лидер-правам"
+		"en"		"{2}: {1} has become a potential leader"
+	}
+
+	"This player already leader"
+	{
+		"ru"		"Данный игрок уже обладает Лидер-правами"
+		"en"		"This player is already a potential leader"
+	
+	}
+	"Client is new leader"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{1} стал новым Лидером"
+		"en"		"{1} became the new Leader"
+	
+	}
+	"Client is no longer a leader"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{1} покинул пост Лидера"
+		"en"		"{1} is no longer a leader"
+	
+	}
+	"Leader has disconnected"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{1} отключился от сервера"
+		"en"		"{1} disconnected from server"
+	
+	}
+	"Leader has died"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{1} погиб смертью храбрых"
+		"en"		"{1} has died"
+	
+	}
+	"Leader menu title"
+	{
+		"ru"		"Главное Лидер-меню"
+		"en"		"Leader menu"
+	
+	}
+	"Leave lead"
+	{
+		"ru"		"Покинуть пост"
+		"en"		"Leave"
+	
+	}
+	"Marker"
+	{
+		"ru"		"Указатель"
+		"en"		"Marker"
+	
+	}
+	"Beacon"
+	{
+		"ru"		"Маяк"
+		"en"		"Beacon"
+	
+	}
+	"Mute players"
+	{
+		"ru"		"Мут игроков"
+		"en"		"Mute players"
+	
+	}
+	"Easy control"
+	{
+		"ru"		"Легкий контроль"
+		"en"		"Easy control"
+	}
+	"All players had their microphone turned off"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{1}: Всем игрокам был {C2}отключен{C1} микрофон!"
+		"en"		"{1}: All players have their microphone {C2}muted{C1}!"
+	
+	}
+	"All players had their microphone turned on"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{1}: Всем игрокам был {C2}включен{C1} микрофон!"
+		"en"		"{1}: All players have their microphone {C2}on{C1}!"
+	
+	}
+	"Current leaders"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Текущие лидеры: {C2}{1}"
+		"en"		"Current leaders: {C2}{1}"
+	}
+	"Possible leaders"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Потенциальные лидеры: {C2}{1}"
+		"en"		"Possible leaders: {C2}{1}"
+	
+	}
+}

@@ -1,0 +1,40 @@
+﻿"Phrases"
+{
+	"Title"
+	{
+		"ru"	"Музыка в конце раунда"
+		"en"	"Round End Sound"
+	}
+	"Toggle"
+	{
+		"ru"	"Музыка"
+		"en"	"Music"
+	}
+	"Messages"
+	{
+		"ru"	"Сообщения"
+		"en"	"Messages"
+	}
+	"Volume"
+	{
+		"ru"	"Громкость"
+		"en"	"Volume"
+	}
+	"Playlists"
+	{
+		"ru"	"Плейлисты"
+		"en"	"Playlists"
+	
+	}
+	"Playlists menu title"
+	{
+		"ru"	"Плейлисты"
+		"en"	"Playlists"
+	}
+	"Current Song"
+	{
+		"ru"	"{C}876ED7[Музыка] {C}C9F76FСейчас играет"
+		"en"	"{C}876ED7[Music] {C}C9F76FPlaying now"
+	
+	}
+}

@@ -1,0 +1,2 @@
+models/player/vad36militiasanta/santa_ct.mdl=3
+models/player/vad36militiasanta/santa.mdl=2

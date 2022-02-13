@@ -1,0 +1,41 @@
+﻿"Phrases"
+{
+	"Tracers"
+	{
+		"ru"	"Трейсеры"
+		"en"	"Tracers"
+	}
+	"Title"
+	{
+		"ru"	"Список трейсеров"
+		"en"	"Tracers list"
+	}
+	"Hide Tracers"
+	{
+		"ru"	"Скрытие трейсеров"
+		"en"	"Hide Tracers"
+	}
+	"Nothing"
+	{
+		"ru"	"Ничего"
+		"en"	"Nothing"
+	
+	}
+	"Red"
+	{
+		"ru"	"Красный"
+		"en"	"Red"
+	
+	}
+	"Green"
+	{
+		"ru"	"Зеленый"
+		"en"	"Green"
+	}
+	"Blue"
+	{
+		"ru"	"Синий"
+		"en"	"Blue"
+	
+	}
+}
