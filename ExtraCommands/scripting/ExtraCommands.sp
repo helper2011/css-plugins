@@ -22,7 +22,7 @@ static char g_sServerCanExecuteCmds[][] = {	"cl_soundscape_flush", "r_screenover
 
 public Plugin myinfo =
 {
-	name 		= "Advanced Commands",
+	name 		= "Advanced Commands [Edited]",
 	author 		= "BotoX + Obus",
 	description	= "Adds extra commands for admins.",
 	version 	= "2.1.4",
