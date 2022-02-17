@@ -4,18 +4,28 @@
 
 #pragma newdecls required
 
-const int WEAPONS_MAX = 10;
-const int WEAPON_LIFETIME = 15;
+const int WEAPONS_MAX = 100;
 
 Handle Timer, StartRoundTimer;
 int Weapon[WEAPONS_MAX], Time[WEAPONS_MAX];
 
+ConVar cvarFlags, cvarLifeTime, cvarMaxWeapons;
+
+int Flags, LifeTime, MaxWeapons;
+
 bool RoundIsStarted;
+
+enum
+{
+	IGNORE_SPECIAL_WEAPONS	=	(1 << 0),
+	IGNORE_C4 				=	(1 << 1),
+	DROP_REMOVE_INSTANTLY	=	(1 << 2)
+}
 
 public Plugin myinfo = 
 {
     name = "Weapon Cleaner",
-    version = "1.0",
+    version = "1.1",
     author = "hEl"
 };
 
@@ -26,13 +36,45 @@ public void OnPluginStart()
 	HookEvent("round_end", OnRoundEnd, EventHookMode_PostNoCopy);
 	
 	(FindConVar("mp_restartgame")).AddChangeHook(OnConVarChange);
+	
+	cvarFlags = CreateConVar("sm_weapon_cleaner_flags", "3", "1 = Ignore special weapons\n2 = Ignore C4\n4 = Remove drop instantly");
+	cvarLifeTime = CreateConVar("sm_weapon_cleaner_lifetime", "15", "Weapon life");
+	cvarMaxWeapons = CreateConVar("sm_weapon_cleaner_max_weapons", "10", "Max dropped weapons", _, true, 0.0, true, float(WEAPONS_MAX));
+	
+	cvarFlags.AddChangeHook(OnConVarChange);
+	cvarLifeTime.AddChangeHook(OnConVarChange);
+	cvarMaxWeapons.AddChangeHook(OnConVarChange);
+	
+	AutoExecConfig(true, "plugin.WeaponCleaner");
+}
+
+public void OnConfigsExecuted()
+{
+	Flags = cvarFlags.IntValue;
+	LifeTime = cvarLifeTime.IntValue;
+	MaxWeapons = cvarMaxWeapons.IntValue;
 }
 
 public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
-	if(!StringToInt(oldValue) && StringToInt(newValue) > 0)
+	if(cvar == cvarFlags)
 	{
-		OnRoundEnd(null, "", false);
+		Flags = cvarFlags.IntValue;
+	}
+	else if(cvar == cvarLifeTime)
+	{
+		LifeTime = cvarLifeTime.IntValue;
+	}
+	else if(cvar == cvarMaxWeapons)
+	{
+		MaxWeapons = cvarMaxWeapons.IntValue;
+	}
+	else
+	{
+		if(!StringToInt(oldValue) && StringToInt(newValue) > 0)
+		{
+			OnRoundEnd(null, "", false);
+		}
 	}
 }
 
@@ -40,7 +82,7 @@ public void OnRoundStart(Event hEvent, const char[] event, bool bDontBroadcast)
 {
 	ClearWeapons();
 	delete StartRoundTimer;
-	StartRoundTimer = CreateTimer(10.0, Timer_StartRound);
+	StartRoundTimer = CreateTimer(2.0, Timer_StartRound);
 }
 
 public Action Timer_StartRound(Handle hTimer)
@@ -110,15 +152,23 @@ public Action Timer_WeaponCleaner(Handle hTimer)
 	return Plugin_Continue;
 }
 
-void InsertWeapon(int iWeapon)
+void InsertWeapon(int iWeapon, bool bDrop = false)
 {
-	if(!IsValidEntity(iWeapon) || GetEntPropEnt(iWeapon, Prop_Data, "m_hOwnerEntity") != -1 || GetEntProp(iWeapon, Prop_Data, "m_iHammerID"))
+	if(	!IsValidEntity(iWeapon) || 
+		GetEntPropEnt(iWeapon, Prop_Data, "m_hOwnerEntity") != -1 || 
+		(Flags & IGNORE_SPECIAL_WEAPONS && GetEntProp(iWeapon, Prop_Data, "m_iHammerID")) ||
+		(Flags & IGNORE_C4 && Weapon_IsC4(iWeapon)))	
+			return;
+	
+	if(bDrop && Flags & DROP_REMOVE_INSTANTLY)
 	{
+		RemoveEntity(iWeapon);
 		return;
 	}
+
 	ToggleTimer(true);
 	int iTime, iMode, iId = -1;
-	for(int i; i < WEAPONS_MAX; i++)
+	for(int i; i < MaxWeapons; i++)
 	{
 		if(Weapon[i])
 		{
@@ -153,9 +203,16 @@ void InsertWeapon(int iWeapon)
 	}
 }
 
+bool Weapon_IsC4(int iWeapon)
+{
+	char szBuffer[16];
+	GetEntityClassname(iWeapon, szBuffer, 16);
+	return (strcmp(szBuffer, "weapon_c4", false) == 0);
+}
+
 bool RemoveWeapon(int iWeapon, bool bForce = false)
 {
-	if(!bForce && GetTime() - Time[iWeapon] <= WEAPON_LIFETIME)
+	if(!bForce && GetTime() - Time[iWeapon] <= LifeTime)
 	{
 		return false;
 	}
@@ -176,7 +233,7 @@ public Action CS_OnCSWeaponDrop(int client, int weaponIndex)
 
 public void OnWeaponDropped(int weapon)
 {
-	InsertWeapon(weapon);
+	InsertWeapon(weapon, true);
 }
 
 void ClearWeapons()
