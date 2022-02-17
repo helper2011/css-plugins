@@ -1,21 +1,21 @@
-#pragma semicolon 1
-
 #include <sourcemod>
 #include <sdktools_tempents>
 
-public Plugin:myinfo = 
+#pragma newdecls required
+
+public Plugin myinfo = 
 {
 	name	= "Spray Blocker",
 	author	= "wS / Schmidt",
 	version	= "1.0"
 };
 
-public OnPluginStart()
+public void OnPluginStart()
 {
 	AddTempEntHook("Player Decal", wS);
 }
 
-public Action:wS(const String:te_name[], const Players[], numClients, Float:delay)
+public Action wS(const char[] name, const int[] Players, int iPlayersCount, float delay)
 {
 	return Plugin_Stop;
 }

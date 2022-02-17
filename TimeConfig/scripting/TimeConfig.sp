@@ -153,15 +153,6 @@ void ParseConfig(int iEvent = 0)
 		}
 		while(Config.GotoNextKey(false));
 		Config.GoBack();
-		if(Config.GotoFirstSubKey())
-		{
-			do
-			{
-
-			}
-			while(hKeyValues.GotoNextKey());
-			hKeyValues.GoBack();
-		}
 		if(bInRange && !bToggle)
 		{
 			Config.SetNum("toggle", 1);
