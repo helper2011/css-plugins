@@ -13,9 +13,12 @@ enum
 	TOTAL
 }
 
-int		m_CollisionGroup;
-ConVar	ConVars[TOTAL];
-bool	Toggle[TOTAL];
+int
+	m_CollisionGroup;
+ConVar
+	ConVars[TOTAL];
+bool
+	Toggle[TOTAL];
 
 public Plugin myinfo = 
 {
