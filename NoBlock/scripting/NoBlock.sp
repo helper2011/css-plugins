@@ -37,8 +37,8 @@ public void OnPluginStart()
 	
 	CreateConVar2(PLAYERS,	"sm_noblock",			"1",	"Removes players collision");
 	CreateConVar2(NADES,	"sm_noblock_nades",		"1",	"Removes nades collision");
-	CreateConVar2(HOSTAGES,	"sm_noblock_hostages",	"1",	"Removes hostages collision");
-	CreateConVar2(WEAPONS,	"sm_noblock_weapons",	"1",	"Removes weapons collision");
+	CreateConVar2(HOSTAGES,	"sm_noblock_hostages",	"0",	"Removes hostages collision");
+	CreateConVar2(WEAPONS,	"sm_noblock_weapons",	"0",	"Removes weapons collision");
 	
 	AutoExecConfig(true, "plugin.NoBlock");
 }
