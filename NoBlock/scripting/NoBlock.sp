@@ -1,16 +1,26 @@
 #include <sourcemod>
+#include <cstrike>
 
 #pragma newdecls required
 
-int m_CollisionGroup;
+enum
+{
+	PLAYERS,
+	NADES,
+	HOSTAGES,
+	WEAPONS,
+	
+	TOTAL
+}
 
-ConVar ConVars[3];
-bool Toggle[3];
+int		m_CollisionGroup;
+ConVar	ConVars[TOTAL];
+bool	Toggle[TOTAL];
 
 public Plugin myinfo = 
 {
 	name		= "NoBlock",
-	version		= "1.0",
+	version		= "1.1",
 	description	= "",
 	author		= "hEl"
 }
@@ -22,32 +32,41 @@ public void OnPluginStart()
 		SetFailState("[NoBlock] Failed to get offset for CBaseEntity::m_CollisionGroup.");
 	}
 	
-	CreateConVar2(0, "sm_noblock", "1", "Removes player vs. player collisions");
-	CreateConVar2(1, "sm_noblock_nades", "1", "Removes player vs. nade collisions");
-	CreateConVar2(2, "sm_noblock_hostages", "1", "Removes player vs. hostage collisions");
-	AutoExecConfig(true, "plugin.NoBlock");
+	CreateConVar2(PLAYERS,	"sm_noblock",			"1",	"Removes players collision");
+	CreateConVar2(NADES,	"sm_noblock_nades",		"1",	"Removes nades collision");
+	CreateConVar2(HOSTAGES,	"sm_noblock_hostages",	"1",	"Removes hostages collision");
+	CreateConVar2(WEAPONS,	"sm_noblock_weapons",	"1",	"Removes weapons collision");
 	
-	if(Toggle[0])
-	{
-		HookEvent("player_spawn", OnPlayerSpawn);
-		SetClientsBlock(false);
-	}
-	if(Toggle[2])
-	{
-		HookEvent("round_start", OnRoundStart);
-		SetHostagesBlock(false);
-	}
+	AutoExecConfig(true, "plugin.NoBlock");
 }
 
 public void OnPluginEnd()
 {
-	if(Toggle[0])
+	if(Toggle[PLAYERS])
 	{
 		SetClientsBlock(true);
 	}
-	if(Toggle[2])
+	if(Toggle[HOSTAGES])
 	{
 		SetHostagesBlock(true);
+	}
+}
+
+public void OnConfigsExecuted()
+{
+	for(int i; i < TOTAL; i++)
+	{
+		Toggle[i] = ConVars[i].BoolValue;
+	}
+	if(Toggle[PLAYERS])
+	{
+		HookEvent("player_spawn", OnPlayerSpawn);
+		SetClientsBlock(false);
+	}
+	if(Toggle[HOSTAGES])
+	{
+		HookEvent("round_start", OnRoundStart);
+		SetHostagesBlock(false);
 	}
 }
 
@@ -60,31 +79,34 @@ void CreateConVar2(int iId, const char[] cvar, const char[] value, const char[] 
 
 public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
-	for(int i; i < 3; i++)
+	for(int i; i < TOTAL; i++)
 	{
 		if(cvar == ConVars[i])
 		{
 			bool bOldValue = view_as<bool>(StringToInt(oldValue));
 			Toggle[i] = ConVars[i].BoolValue;
-			
-			if(i == 0)
+			switch(i)
 			{
-				if(Toggle[i] != bOldValue)
+				case PLAYERS:
 				{
-					HookEvent2(0, "player_spawn", OnPlayerSpawn);
+					if(Toggle[i] != bOldValue)
+					{
+						HookEvent2(0, "player_spawn", OnPlayerSpawn);
+					}
+					SetClientsBlock(!Toggle[i]);
+					break;
+				
 				}
-				SetClientsBlock(!Toggle[i]);
-			}
-			else if(i == 2)
-			{
-				if(Toggle[i] != bOldValue)
+				case HOSTAGES:
 				{
-					HookEvent2(2, "round_start", OnRoundStart);
+					if(Toggle[i] != bOldValue)
+					{
+						HookEvent2(2, "round_start", OnRoundStart);
+					}
+					SetHostagesBlock(!Toggle[i]);
+					break;
 				}
-				SetHostagesBlock(!Toggle[i]);
 			}
-			
-			break;
 		}
 	}
 }
@@ -107,32 +129,36 @@ void SetClientsBlock(bool bBlock)
 
 void SetHostagesBlock(bool bBlock)
 {
+	char szBuffer[32];
 	int iEntities = GetMaxEntities();
 	
 	for(int i = MaxClients + 1; i <= iEntities; i++)
 	{
-		if(!IsValidEntity(i))
+		if(!IsValidEntity(i) || !GetEntityClassname(i, szBuffer, 32) || strcmp(szBuffer, "hostage_entity", false))
 			continue;
 			
-		char szBuffer[32];
-		if(GetEntityClassname(i, szBuffer, 32) && !strcmp(szBuffer, "hostage_entity", false))
-		{
-			SetEntityBlock(i, bBlock);
-		}
+		SetEntityBlock(i, bBlock);
 	}
 }
 
 public void OnEntityCreated(int iEntity, const char[] classname)
 {
-	if(IsValidEntity(iEntity) && Toggle[1] && strlen(classname) > 19)
+	if(!IsValidEntity(iEntity))
+		return;
+	
+	if(Toggle[NADES])
 	{
-		switch(classname[0])
+		if(strlen(classname) > 19)
 		{
-			case 'h', 'f', 's':
+			switch(classname[0])
 			{
-				if(classname[10] == 'p' || classname[13] == 'p')
+				case 'h', 'f', 's':
 				{
-					SetEntityBlock(iEntity, false);
+					if(classname[10] == 'p' || classname[13] == 'p')
+					{
+						SetEntityBlock(iEntity, false);
+						return;
+					}
 				}
 			}
 		}
@@ -153,10 +179,10 @@ void HookEvent2(int iId, const char[] event, EventHook callback)
 
 public void OnPlayerSpawn(Event hEvent, const char[] event, bool bDontBroadcast)
 {
-	CreateTimer(0.0, Timer_OnPlayerSpawn, GetClientOfUserId(hEvent.GetInt("userid")));
+	RequestFrame(OnPlayerSpawnNextTick, GetClientOfUserId(hEvent.GetInt("userid")));
 }
 
-public Action Timer_OnPlayerSpawn(Handle hTimer, int iClient)
+void OnPlayerSpawnNextTick(int iClient)
 {
 	if(IsClientInGame(iClient) && IsPlayerAlive(iClient))
 	{
@@ -173,4 +199,12 @@ public void OnRoundStart(Event hEvent, const char[] event, bool bDontBroadcast)
 public Action Timer_OnRoundStart(Handle hTimer, int iClient)
 {
 	SetHostagesBlock(false);
+}
+
+public Action CS_OnCSWeaponDrop(int iClient, int iWeapon)
+{
+	if(Toggle[WEAPONS])
+	{
+		SetEntityBlock(iWeapon, false);
+	}
 }
