@@ -13,6 +13,7 @@ Handle
 Menu 
 	ColorsMenu;
 bool 
+	ClientIsVIP[MAXPLAYERS + 1],
 	Hide[MAXPLAYERS + 1];
 int 
 	Sprite, 
@@ -107,12 +108,12 @@ public void OnPluginStart()
 			if(AreClientCookiesCached(i))
 			{
 				OnClientCookiesCached(i);
-				if(VIP_IsClientVIP(i))
-				{
-					VIP_OnVIPClientLoaded(i);
-				}
-				
 			}
+			if(VIP_IsClientVIP(i))
+			{
+				VIP_OnVIPClientLoaded(i);
+			}
+			
 		}
 	}
 }
@@ -244,7 +245,6 @@ public void OnClientPutInServer(int iClient)
 	if(IsFakeClient(iClient))
 	{
 		Hide[iClient] = true;
-		
 	}
 }
 
@@ -253,22 +253,35 @@ public void OnClientCookiesCached(int iClient)
 	if(IsFakeClient(iClient))
 		return;
 		
-	
 	char szBuffer[16];
 	GetClientCookie(iClient, g_hCookie[1], szBuffer, 16);
-	
 	Hide[iClient] = szBuffer[0] ? view_as<bool>(StringToInt(szBuffer)):false;
+
+	if(ClientIsVIP[iClient])
+	{
+		LoadClientVIPSettings(iClient);
+	}
 }
 
 public void OnClientDisconnect(int iClient)
 {
 	Item[iClient] = -1;
 	Hide[iClient] = false;
+	ClientIsVIP[iClient] = false;
 }
 
 public void VIP_OnVIPClientLoaded(int iClient)
 {
-	if(VIP_GetClientFeatureStatus(iClient, g_sFeature)!= NO_ACCESS)
+	ClientIsVIP[iClient] = true;
+	if(AreClientCookiesCached(iClient))
+	{
+		LoadClientVIPSettings(iClient);
+	}
+}
+
+void LoadClientVIPSettings(int iClient)
+{
+	if(VIP_GetClientFeatureStatus(iClient, g_sFeature) != NO_ACCESS)
 	{
 		char szBuffer[16];
 		GetClientCookie(iClient, g_hCookie[0], szBuffer, 16);
@@ -314,13 +327,17 @@ int GetTracerIndex(const char[] color)
 
 public void Event_BulletImpact(Event hEvent, const char[] eventName, bool bDontBroadcast)
 {
-	int iClient = GetClientOfUserId(GetEventInt(hEvent, "userid"));
+	static int iClient;
+	static float ClientOrigin[3];
+	static float StartPos[3];
+	static float EndPos[3];
+	static float Percentage;
+	iClient = GetClientOfUserId(GetEventInt(hEvent, "userid"));
 
 	if(iClient && !Hide[iClient] && Item[iClient] != -1)
 	{
 		int Players;
 		int[] Player = new int[MaxClients];
-		float ClientOrigin[3], StartPos[3], EndPos[3], Percentage;
 		
 		GetClientEyePosition(iClient, ClientOrigin);
 		

@@ -17,10 +17,10 @@ stock void BL_Load()
 	if(hFile)
 	{
 		
-		while (!IsEndOfFile(hFile) && BL_Clans < MAX_BLACK_LIST_CLANS)
+		while (!hFile.EndOfFile() && BL_Clans < MAX_BLACK_LIST_CLANS)
 		{
-			if (!ReadFileLine(hFile, szBuffer, 256))
-				break;
+			if (!hFile.ReadLine(szBuffer, 256))
+				continue;
 			
 			if(TrimString(szBuffer) > 0)
 			{
@@ -34,9 +34,9 @@ stock void BL_Load()
 	if(hFile)
 	{
 		
-		while (!IsEndOfFile(hFile) && BL_SteamIDs < MAX_BLACK_LIST_CLIENTS)
+		while (!hFile.EndOfFile() && BL_SteamIDs < MAX_BLACK_LIST_CLIENTS)
 		{
-			if (!ReadFileLine(hFile, szBuffer, 256))
+			if (!hFile.ReadLine(szBuffer, 256))
 				break;
 			
 			if(TrimString(szBuffer) > 0)

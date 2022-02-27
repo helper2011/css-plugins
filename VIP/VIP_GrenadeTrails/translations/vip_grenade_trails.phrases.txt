@@ -1,0 +1,13 @@
+﻿"Phrases"
+{
+	"GrenadeTrails"
+	{
+		"ru"	"Трейлы гранат"
+		"en"	"Tracers"
+	}
+	"Title"
+	{
+		"ru"	"Список цветов"
+		"en"	"Colors list"
+	}
+}
