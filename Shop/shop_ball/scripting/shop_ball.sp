@@ -2,7 +2,8 @@
 #include <sdktools>
 #include <sdkhooks>
 #include <shop>
-#include <helco>
+
+#define HELPER
 
 #undef REQUIRE_PLUGIN
 #tryinclude <HNS>
@@ -26,6 +27,12 @@ char BallModel[256], PickSound[256];
 GlobalForward
 	GF_OnClientPickGift;
 
+#if defined HELPER
+const int MAX_HELPERS = 10;
+int Helper[MAX_HELPERS], Helpers;
+#endif
+
+
 public Plugin myinfo = 
 {
 	name = "[Shop] Ball [Edited]",
@@ -39,7 +46,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 {
 	CreateNative("ShopBall_IsMapHaveGift", Native_IsMapHaveGift);
 	RegPluginLibrary("shop_ball");
-    return APLRes_Success;
+	return APLRes_Success;
 }
 
 public int Native_IsMapHaveGift(Handle plugin, int numParams)
@@ -65,8 +72,71 @@ public void OnPluginStart()
 	LoadTranslations("shop_ball.phrases");
 	HNS = LibraryExists("HNS");
 	AutoExecConfig(true, "plugin.Ball", "shop");
+
+
+	#if defined HELPER
+	RegConsoleCmd("sm_ball_present", Command_Helper_BallPresent);
+	LoadHelpers();
+	#endif
 }
 
+#if defined HELPER
+
+public Action Command_Helper_BallPresent(int iClient, int iArgs)
+{
+	if(!iClient || !ClientIsHelper(iClient))
+	{
+		return Plugin_Continue;
+	}
+	char szBuffer[64];
+	float fPos[3];
+	GetCurrentMap(szBuffer, 64);
+	GetClientAbsOrigin(iClient, fPos);
+	SetBallPosition(iClient);
+	ServerCommand("sm_ball_reload");
+	ServerCommand("sm_ballsetcredits 1 200");
+	ServerCommand("sm_ballsetcredits 2 150");
+	ServerCommand("sm_ballsetcredits 3 100");
+	ServerCommand("sm_ballsetcredits 0 50");
+	ServerCommand("sm_ball_reload");
+	LogMessage("Helper %L set ball [Map: %s, Pos: %.1f %.1f %.1f", iClient, szBuffer, fPos[0], fPos[1], fPos[2]);
+	return Plugin_Handled;
+}
+
+bool ClientIsHelper(int iClient)
+{
+	int iSteamID = GetSteamAccountID(iClient, true);
+
+	for(int i; i < Helpers; i++)
+	{
+		if(Helper[i] == iSteamID)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+void LoadHelpers()
+{
+	char szBuffer[256];
+	BuildPath(Path_SM, szBuffer, 256, "configs/shop/ball_helpers.txt");
+	File hFile = OpenFile(szBuffer, "r");
+	if(hFile)
+	{
+		
+		while (!hFile.EndOfFile() && Helpers < MAX_HELPERS)
+		{
+			if (!hFile.ReadLine(szBuffer, 256))
+				continue;
+			
+			if(TrimString(szBuffer) > 0)
+			{
+				Helper[Helpers++] = StringToInt(szBuffer);
+			}
+		}
+	}
+}
+#endif
 public void OnMapStart()
 {
 	cvarModel.GetString(BallModel, 256);
@@ -193,6 +263,12 @@ public Action Command_SetBallPosition(int client, int argc)
 		ReplyToCommand(client, "ERROR: You can't use that command while not in game!");
 		return Plugin_Handled;
 	}
+	SetBallPosition(client);
+	return Plugin_Handled;
+}
+
+void SetBallPosition(int client)
+{
 	char szBuffer[256], szBuffer2[256];
 	BuildPath(Path_SM, szBuffer, 256, "configs/shop/ball.txt");
 	KeyValues hKeyValues = new KeyValues("Ball");
@@ -215,7 +291,6 @@ public Action Command_SetBallPosition(int client, int argc)
 		PrintToChat2(client, "%t", "SetPosFailed");
 	}
 	delete hKeyValues;
-	return Plugin_Handled;
 }
 
 public Action Command_SetPositionCredits(int client, int argc)
@@ -487,4 +562,72 @@ int GetClientCount2()
 	}
 	
 	return iCount;
+}
+
+void PrintToChat2(int iClient, const char[] message, any ...)
+{
+	int iLen = strlen(message) + 255;
+	char[] szBuffer = new char[iLen];
+	SetGlobalTransTarget(iClient);
+	VFormat(szBuffer, iLen, message, 3);
+	if(iClient == 0)
+	{
+		PrintToConsole(iClient, szBuffer);
+	}
+	else
+	{
+		SendMessage(iClient, szBuffer, iLen);
+	}
+}
+
+
+stock void PrintToChatAll2(const char[] message, any ...)
+{
+	int iLen = strlen(message) + 255;
+	char[] szBuffer = new char[iLen];
+	for(int i = 1;i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i) && !IsFakeClient(i))
+		{
+			SetGlobalTransTarget(i);
+			VFormat(szBuffer, iLen, message, 2);
+			SendMessage(i, szBuffer, iLen);
+		}
+	}
+}
+
+
+void SendMessage(int iClient, char[] szBuffer, int iSize)
+{
+	static int mode = -1;
+	if(mode == -1)
+	{
+		mode = view_as<int>(GetUserMessageType() == UM_Protobuf);
+	}
+	SetGlobalTransTarget(iClient);
+	Format(szBuffer, iSize, "\x01%s", szBuffer);
+	ReplaceString(szBuffer, iSize, "{C}", "\x07");
+
+	
+	Handle hMessage = StartMessageOne("SayText2", iClient, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+	switch(mode)
+	{
+		case 0:
+		{
+			BfWrite bfWrite = UserMessageToBfWrite(hMessage);
+			bfWrite.WriteByte(iClient);
+			bfWrite.WriteByte(true);
+			bfWrite.WriteString(szBuffer);
+		}
+		case 1:
+		{
+			Protobuf protoBuf = UserMessageToProtobuf(hMessage);
+			protoBuf.SetInt("ent_idx", iClient);
+			protoBuf.SetBool("chat", true);
+			protoBuf.SetString("msg_name", szBuffer);
+			for(int k;k < 4;k++)	
+				protoBuf.AddString("params", "");
+		}
+	}
+	EndMessage();
 }
