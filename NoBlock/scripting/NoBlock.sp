@@ -40,6 +40,17 @@ public void OnPluginStart()
 	CreateConVar2(HOSTAGES,	"sm_noblock_hostages",	"0",	"Removes hostages collision");
 	CreateConVar2(WEAPONS,	"sm_noblock_weapons",	"0",	"Removes weapons collision");
 	
+	if(Toggle[PLAYERS])
+	{
+		HookEvent("player_spawn", OnPlayerSpawn);
+		SetClientsBlock(false);
+	}
+	if(Toggle[HOSTAGES])
+	{
+		HookEvent("round_start", OnRoundStart);
+		SetHostagesBlock(false);
+	}
+	
 	AutoExecConfig(true, "plugin.NoBlock");
 }
 
@@ -55,24 +66,6 @@ public void OnPluginEnd()
 	}
 }
 
-public void OnConfigsExecuted()
-{
-	for(int i; i < TOTAL; i++)
-	{
-		Toggle[i] = ConVars[i].BoolValue;
-	}
-	if(Toggle[PLAYERS])
-	{
-		HookEvent("player_spawn", OnPlayerSpawn);
-		SetClientsBlock(false);
-	}
-	if(Toggle[HOSTAGES])
-	{
-		HookEvent("round_start", OnRoundStart);
-		SetHostagesBlock(false);
-	}
-}
-
 void CreateConVar2(int iId, const char[] cvar, const char[] value, const char[] description)
 {
 	ConVars[iId] = CreateConVar(cvar, value, description);
@@ -82,34 +75,36 @@ void CreateConVar2(int iId, const char[] cvar, const char[] value, const char[] 
 
 public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
+	int index;
+	bool bOldValue = view_as<bool>(StringToInt(oldValue));
+	
 	for(int i; i < TOTAL; i++)
 	{
 		if(cvar == ConVars[i])
 		{
-			bool bOldValue = view_as<bool>(StringToInt(oldValue));
+			index = i;
 			Toggle[i] = ConVars[i].BoolValue;
-			switch(i)
+			break;
+		}
+	}
+	switch(index)
+	{
+		case PLAYERS:
+		{
+			if(Toggle[i] != bOldValue)
 			{
-				case PLAYERS:
-				{
-					if(Toggle[i] != bOldValue)
-					{
-						HookEvent2(0, "player_spawn", OnPlayerSpawn);
-					}
-					SetClientsBlock(!Toggle[i]);
-					break;
-				
-				}
-				case HOSTAGES:
-				{
-					if(Toggle[i] != bOldValue)
-					{
-						HookEvent2(2, "round_start", OnRoundStart);
-					}
-					SetHostagesBlock(!Toggle[i]);
-					break;
-				}
+				HookEvent2(PLAYERS, "player_spawn", OnPlayerSpawn);
 			}
+			SetClientsBlock(!Toggle[i]);
+		
+		}
+		case HOSTAGES:
+		{
+			if(Toggle[i] != bOldValue)
+			{
+				HookEvent2(HOSTAGES, "round_start", OnRoundStart);
+			}
+			SetHostagesBlock(!Toggle[i]);
 		}
 	}
 }
