@@ -1,27 +1,69 @@
+#include <sourcemod>
 #include <sdktools_functions>
-#include <toponline>
 
 #pragma newdecls required
 
-Menu			g_hMenu;
-Database		g_hDatabase;
-int				ID[MAXPLAYERS + 1],
-				Online[MAXPLAYERS + 1],
-				TempOnline[MAXPLAYERS + 1],
-				Button[MAXPLAYERS + 1][100],
-				SameAngles[MAXPLAYERS + 1],
-				OnlineCount,
-				LastAverage,
-				MinAverage,
-				MinPlayers,
-				Buttons[MAXPLAYERS + 1];
-float			LastPosition[MAXPLAYERS + 1][3],
-				LastAngle[MAXPLAYERS + 1];
-bool			ButtonsToggle,
-				AFK[MAXPLAYERS + 1];
-ConVar			cvarOnlineCount, cvarButtons, cvarButtonsMinAverage, cvarMinPlayers;
+enum
+{
+	TOP_ALL,
+	TOP_WEEK,
+	TOP_MONTH,
 
-GlobalForward	g_hGFwd_OnClientOnlineCounted;
+	TOP_TOTAL
+}
+
+enum 
+{
+	CLIENT_ID,
+	CLIENT_INFO,
+	CLIENT_ONLINE_TOTAL,
+	CLIENT_ONLINE_CLEAN,
+	CLIENT_ONLINE_DYNAMIC_TOTAL,
+	CLIENT_ONLINE_DYNAMIC_CLEAN,
+	CLIENT_ONLINE_DYNAMIC_SESSION_TIME,
+	CLIENT_SAME_ANGLES_TICKS,
+	CLIENT_DATA_TOTAL
+}
+
+enum /* Client info */
+{
+	CLIENT_INFO_AUTHORIZED 		= (1 << 0),
+	CLIENT_INFO_SESSION_LOADED	= (1 << 1),
+	CLIENT_INFO_LOADED			= (1 << 2)
+}
+
+static const char intervalNames[][] = 
+{
+	"all",
+	"week",
+	"month"
+}
+
+static const char intervalTitle[][] = 
+{
+	"All Time",
+	"Week",
+	"Month"
+}
+
+
+
+static const int intervalTimes[] = 
+{
+	0,
+	604800,
+	2628288
+}
+
+bool			DatabaseIsLoaded;
+int				ClientData[MAXPLAYERS + 1][CLIENT_DATA_TOTAL];
+float			ClientLastPos[MAXPLAYERS + 1][3],
+				ClientLastAngle[MAXPLAYERS + 1];
+Handle			TimerOnline;
+ConVar			cvarTopTotalOnlineCount, cvarTopDynamicOnlineCount, cvarDynamicMinAllTime, cvarDynamicMaxSessionTime;
+Database		g_hDatabase;
+Panel			TopMenus[TOP_TOTAL];
+int 			TopMenusCountCurrentQueries[TOP_TOTAL];
 
 public Plugin myinfo = 
 {
@@ -33,142 +75,196 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	RegServerCmd("sm_toponline_reload", Command_TopOnline_Reload);
 	RegConsoleCmd("sm_toponline", Command_TopOnline);
-	cvarOnlineCount			= CreateConVar("toponline_count", "100");				OnlineCount = cvarOnlineCount.IntValue;
-	cvarButtons				= CreateConVar("toponline_buttons", "1");				ButtonsToggle = cvarButtons.BoolValue;
-	cvarButtonsMinAverage	= CreateConVar("toponline_buttons_min_average", "5");	MinAverage = cvarButtonsMinAverage.IntValue;
-	cvarMinPlayers			= CreateConVar("toponline_min_players", "3");			MinPlayers = cvarMinPlayers.IntValue;
-	
-	cvarOnlineCount.AddChangeHook(OnConVarChange);
-	cvarButtons.AddChangeHook(OnConVarChange);
-	cvarButtonsMinAverage.AddChangeHook(OnConVarChange);
-	cvarMinPlayers.AddChangeHook(OnConVarChange);
-	
-	HookEvent("round_start",	OnRoundStart);
-	HookEvent("round_end",		OnRoundEnd);
+	RegConsoleCmd("sm_online", Command_Online);
+	cvarTopTotalOnlineCount	= CreateConVar("sm_toponline_top_total_count", "20");
+	cvarTopDynamicOnlineCount	= CreateConVar("sm_toponline_top_dynamic_count", "10");
+	cvarDynamicMinAllTime	= CreateConVar("sm_toponline_dynamic_min_total_time", "36000");
+	cvarDynamicMaxSessionTime	= CreateConVar("sm_toponline_dynamic_max_session_time", "604800");
+	AutoExecConfig(true, "plugin.TopOnline");
 
-	g_hMenu = new Menu(MenuHandler);
+	for(int i; i < TOP_TOTAL; i++)
+	{
+		TopMenus[i] = new Panel();
+		TopMenus[i].SetKeys(1023);
+	}
+
 	Database.Connect(ConnectCallBack, "toponline");
-	CreateTimer(1.0, Timer_CheckPosition, _, TIMER_REPEAT);
-	
-	g_hGFwd_OnClientOnlineCounted = new GlobalForward("OnClientOnlineCounted", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
-
 }
 
-public Action Command_TopOnline_Reload(int iArgs)
+public void OnMapStart()
 {
-	OnPluginEnd();
-	OnMapStart();
-	return Plugin_Handled;
-}
-
-public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
-{
-	if(cvar == cvarOnlineCount)
-	{
-		OnlineCount = cvar.IntValue;
-		OnMapStart();
-	}
-	else if(cvar == cvarButtons)
-	{
-		ButtonsToggle = cvar.BoolValue;
-		
-		if(!ButtonsToggle)
-		{
-			ClearButtons();
-		}
-	}
-	else if(cvar == cvarButtonsMinAverage)
-	{
-		MinAverage = cvar.IntValue;
-	}
-	else if(cvar == cvarMinPlayers)
-	{
-		MinPlayers = cvar.IntValue;
-	}
-}
-
-void ClearButtons()
-{
-	for(int i = 1; i <= MaxClients; i++)
-	{
-		Buttons[i] = 0;
-	}
-}
-
-public void OnRoundStart(Event hEvent, const char[] event, bool bDontBroadcast)
-{
-	ClearButtons();
-}
-
-public void OnRoundEnd(Event hEvent, const char[] event, bool bDontBroadcast)
-{
-	int iCount;
-	for(int i = 1; i <= MaxClients; i++)
-	{
-		if(IsClientInGame(i) && !IsFakeClient(i) && (!ButtonsToggle || Buttons[i]))
-		{
-			iCount++;
-		}
-	}
-	
-	if(MinPlayers > iCount)
+	if(!DatabaseIsLoaded)
 		return;
 	
-	iCount = 0;
-	
-	int iButtons, Average;
-	if(ButtonsToggle)
+	int iTopTotalOnlineCount = cvarTopTotalOnlineCount.IntValue, iTopDynamicOnlineCount = cvarTopDynamicOnlineCount.IntValue, iTime = GetTime();
+	char szBuffer[256];
+	for(int i; i < TOP_TOTAL; i++)
 	{
-		for(int i = 1; i <= MaxClients; i++)
+		switch(i)
 		{
-			if(IsClientInGame(i) && !IsFakeClient(i) && Buttons[i])
+			case TOP_ALL:
 			{
-				iButtons += Buttons[i];
-				iCount++;
+				FormatEx(szBuffer, 256, "SELECT `name`, `online_clean` FROM `total_online` ORDER BY `online_clean` DESC LIMIT %i", iTopTotalOnlineCount);
+			}
+			default:
+			{
+				FormatEx(szBuffer, 256, "SELECT `client_id`, SUM(`online_clean`) FROM `dynamic_online` WHERE %i - `start_time` <= %i GROUP BY `client_id` ORDER BY SUM(`online_clean`) DESC LIMIT %i", iTime, intervalTimes[i], iTopDynamicOnlineCount);
 			}
 		}
-		
-		Average = iCount != 0 ? (iButtons / iCount):0;
-		//LogMessage("RoundEnd: Players: %i, Button average: %i", iCount, Average);
-		
-		if(MinAverage > Average)
-			return;
-		
-		LastAverage = Average;
-	}
-	
-	for(int i = 1; i <= MaxClients; i++)
-	{
-		if(IsClientInGame(i) && !IsFakeClient(i) && TempOnline[i] && (!ButtonsToggle || Buttons[i] >= Average))
+		if(!TopMenusCountCurrentQueries[i])
 		{
-			Online[i] += TempOnline[i];
-			Call_StartForward(g_hGFwd_OnClientOnlineCounted);
-			Call_PushCell(i);
-			Call_PushCell(TempOnline[i]);
-			Call_PushCell(Online[i]);
-			Call_Finish();
-			
-			TempOnline[i] = 0;
+			PrintToConsoleAll(szBuffer);
+			g_hDatabase.Query(SQL_GetTOP, szBuffer, i);
 		}
 	}
-	
-	
+
+	delete TimerOnline;
+	TimerOnline = CreateTimer(1.0, Timer_CheckPosition, _, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
 }
 
-int FindClientButton(int iClient, int iButtons)
+/*
+int g_iCount;
+stock void ImportDBFromFile()
 {
-	for(int i; i < Buttons[iClient]; i++)
+	int iSymbol, iSymbol2, iAccount, iOnline;
+	char szNick[64];
+	char szFinalNick[MAX_NAME_LENGTH*2+1];
+	char szBuffer[256];
+	BuildPath(Path_SM, szBuffer, 256, "data/import_db.txt");
+	File hFile = OpenFile(szBuffer, "r");
+	if(hFile)
 	{
-		if(Button[iClient][i] == iButtons)
+		//int iCount;
+		while(!hFile.EndOfFile())
 		{
-			return i;
+			if(!hFile.ReadLine(szBuffer, 256) || TrimString(szBuffer) <= 0 || (iSymbol = FindCharInString(szBuffer, ' ')) == -1 || (iSymbol2 = FindCharInString(szBuffer[iSymbol + 1], ' ')) == -1)
+				continue;
+
+			iSymbol2 += iSymbol + 1;
+			strcopy(szNick, 64, szBuffer[iSymbol2 + 1]);
+			szBuffer[iSymbol2] = 0;
+			iOnline = StringToInt(szBuffer[iSymbol + 1]);
+			szBuffer[iSymbol] = 0;
+			iAccount = StringToInt(szBuffer);
+			g_hDatabase.Escape(szNick, szFinalNick, sizeof(szFinalNick));
+			FormatEx(szBuffer, 256, "INSERT INTO `total_online` (`id`, `name`, `online_total`, `online_clean`) VALUES ( %i, '%s', %i, %i);", iAccount, szFinalNick, iOnline, iOnline);
+			g_hDatabase.Query(SQL_Callback_CheckError2, szBuffer);
+			//LogMessage(szBuffer);
+			//PrintToServer(szBuffer);
+			PrintToServer("%i", ++g_iCount);
 		}
 	}
+}
+
+public void SQL_Callback_CheckError2(Database hDatabase, DBResultSet results, const char[] szError, any data)
+{
+	PrintToServer("%i", --g_iCount);
+	if(szError[0])
+	{
+		LogError("SQL_Callback_CheckError: %s", szError);
+	}
+}
+ */
+public void OnMapEnd()
+{
+	TimerOnline = null;
+}
+
+public void SQL_GetTOP(Database hDatabase, DBResultSet hResults, const char[] sError, int iTopID)
+{
+	if(sError[0])
+	{
+		LogError("SQL_GetTOP: %s", sError);
+		return;
+	}
+	if(!hResults || !hResults.RowCount)
+	{
+		return;
+	}
+
+	char szBuffer[256];
+	int iCleanOnline, iPosition = 1;
+	switch(iTopID)
+	{
+		case TOP_ALL:
+		{
+			char szTitle[2048];
+			FormatEx(szTitle, 2048, "Top-%i Online | %s\n \n", cvarTopTotalOnlineCount.IntValue, intervalTitle[iTopID]);
+			char szName[16];
+			while(hResults.FetchRow())
+			{
+				hResults.FetchString(0, szName, 16);
+				iCleanOnline = hResults.FetchInt(1);
+				FormatTime2(iCleanOnline, szBuffer, 256);
+				Format(szBuffer, 256 , "%i. %s (%s)", iPosition, szName, szBuffer);
+				StrCat(szTitle, 2048, szBuffer);
+				StrCat(szTitle, 2048, "\n");
+				iPosition++;
+			}
+			TopMenus[iTopID].SetTitle(szTitle);
+		}
+		default:
+		{
+			int iId;
+			DataPack hPack;
+			DataPack hPack2 = new DataPack();
+			PrintToConsoleAll("%i", hResults.RowCount);
+			while(hResults.FetchRow())
+			{
+				iId = hResults.FetchInt(0);
+				iCleanOnline = hResults.FetchInt(1);
+				hPack = new DataPack();
+				hPack.WriteCell(iTopID);
+				hPack.WriteCell(iCleanOnline);
+				hPack.WriteCell(view_as<int>(hPack2));
+				FormatEx(szBuffer, 256, "SELECT `name` from `total_online` WHERE `id` = %i", iId);
+				PrintToConsoleAll("r = %i\nq=%s", iId, szBuffer);
+				g_hDatabase.Query(SQL_GetClientName, szBuffer, hPack);
+				iPosition++;
+				TopMenusCountCurrentQueries[iTopID]++;
+			}
+		}
+	}
+}
+
+public void SQL_GetClientName(Database hDatabase, DBResultSet hResults, const char[] sError, DataPack hPack)
+{
+	hPack.Reset();
+	int iTopID = hPack.ReadCell(), iCleanOnline = hPack.ReadCell();
+	DataPack hPack2 = view_as<DataPack>(hPack.ReadCell());
+	delete hPack;
+	TopMenusCountCurrentQueries[iTopID]--;
+	if(sError[0])
+	{
+		delete hPack2;
+		LogError("SQL_GetClientName: %s", sError);
+		return;
+	}
+	char szBuffer[256];
+	if(hResults && hResults.FetchRow())
+	{
+		char szName[16];
+		hResults.FetchString(0, szName, 16);
+		FormatTime2(iCleanOnline, szBuffer, 256);
+		Format(szBuffer, 256 , "%i. %s (%s)", view_as<int>(hPack2.Position) + 1, szName, szBuffer);
+		hPack2.WriteString(szBuffer);
+	}
 	
-	
-	return -1;
+	if(!TopMenusCountCurrentQueries[iTopID])
+	{
+		char szTitle[2048];
+		FormatEx(szTitle, 2048, "Top-%i Online | %s\n \n", cvarTopDynamicOnlineCount.IntValue, intervalTitle[iTopID]);
+		hPack2.Reset();
+		while(hPack2.IsReadable(1))
+		{
+			hPack2.ReadString(szBuffer, 256);
+			StrCat(szTitle, 2048, szBuffer);
+			StrCat(szTitle, 2048, "\n");
+		}
+		TopMenus[iTopID].SetTitle(szTitle);
+		delete hPack2;
+	}
 }
 
 public void OnPluginEnd()
@@ -185,141 +281,141 @@ public void OnPluginEnd()
 	}
 }
 
-public Action Command_TopOnline(int iClient, int iArgs)
+public Action Command_Online(int iClient, int iArgs)
 {
-	if(iClient && !IsFakeClient(iClient) && g_hMenu.ItemCount)
+	if(iClient && !IsFakeClient(iClient) && Bit_GetClientInfo(iClient, CLIENT_INFO_LOADED))
 	{
-		g_hMenu.Display(iClient, 0);
+		char szBuffer[256];
+		FormatTime2(ClientData[iClient][CLIENT_ONLINE_CLEAN], szBuffer, 256);
+		PrintToChat(iClient, szBuffer);
+
 	}
 	
 	return Plugin_Handled;
 }
 
-public void OnMapStart()
+public Action Command_TopOnline(int iClient, int iArgs)
 {
-	LastAverage = 0;
-	
-	if(!g_hDatabase)
-		return;
-	
-	if(g_hMenu.ItemCount)
+	if(iClient && !IsFakeClient(iClient))
 	{
-		g_hMenu.RemoveAllItems();
+		char szBuffer[256];
+		switch(iArgs)
+		{
+			case 0:
+			{
+				for(int i; i < sizeof(intervalNames); i++)
+				{
+					StrCat(szBuffer, 256, intervalNames[i]);
+					StrCat(szBuffer, 256, "|");
+				}
+				szBuffer[strlen(szBuffer) - 1] = 0;
+				ReplyToCommand(iClient, "Usage: sm_toponline <%s>", szBuffer);
+
+				TopMenus[TOP_ALL].Send(iClient, TopMenusH, 0);
+			}
+			case 1:
+			{
+				GetCmdArg(1, szBuffer, 256);
+				int iIndex = GetIntervalIdByName(szBuffer);
+				if(iIndex != -1)
+				{
+					TopMenus[iIndex].Send(iClient, TopMenusH, 0);
+				}
+			}
+		}
 	}
-	g_hMenu.SetTitle("TOP Online | TOP-%i", OnlineCount);
 	
-	char szBuffer[256];
-	FormatEx(szBuffer, 256, "SELECT `name`, `online` FROM `toponline` ORDER BY `online` DESC LIMIT %i", OnlineCount);
-	g_hDatabase.Query(SQL_GetTOP, szBuffer);
+	return Plugin_Handled;
 }
 
-
-public int MenuHandler(Menu hMenu, MenuAction action, int iClient, int iItem)
+public int TopMenusH(Menu hMenu, MenuAction action, int iClient, int iItem)
 {
-}
-
-public void SQL_GetTOP(Database hDatabase, DBResultSet hResults, const char[] sError, any data)
-{ 
-	if (sError[0]) 
-	{ 
-		LogError("GetTop100: %s", sError);
-		return;
-	}
-	
-	
-	int iCount = hResults.RowCount;
-	if (iCount > OnlineCount)
-	{
-		iCount = OnlineCount;
-	}
-	else if (!iCount)
-	{
-		return;
-	}
-	
-	char szBuffer[256], szName[64];
-	for(int i = 1; i <= iCount; i++)
-	{
-		hResults.FetchRow();
-		hResults.FetchString(0, szName, 64);
-		int iOnline = hResults.FetchInt(1);
-		FormatTime2(iOnline, szBuffer, 256);
-		Format(szBuffer, 256 , "%i. %s [%s]", i, szName, szBuffer);
-		g_hMenu.AddItem("", szBuffer, ITEMDRAW_DISABLED);
-	}
 }
 
 public Action Timer_CheckPosition(Handle hTimer)
 {
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(!IsClientInGame(i) || !IsPlayerAlive(i) || IsFakeClient(i))
+		if(!IsClientInGame(i) || IsFakeClient(i) || !Bit_GetClientInfo(i, CLIENT_INFO_LOADED))
 			continue;
 		
+
+		ClientData[i][CLIENT_ONLINE_TOTAL]++;
+		ClientData[i][CLIENT_ONLINE_DYNAMIC_TOTAL]++;
+
 		float fPos[3];
 		GetClientAbsOrigin(i, fPos);
 		
-		if(LastPosition[i][0] != 0.0 && LastPosition[i][1] != 0.0 && LastPosition[i][2] != 0.0 && GetVectorDistance(fPos, LastPosition[i]) >= 10.0)
+		if(ClientLastPos[i][0] != 0.0 && ClientLastPos[i][1] != 0.0 && ClientLastPos[i][2] != 0.0 && GetVectorDistance(fPos, ClientLastPos[i]) >= 10.0)
 		{
-			if(ButtonsToggle)
-			{
-				int iButtons = GetClientButtons(i);
-				if(Buttons[i] < 100 && FindClientButton(i, iButtons) == -1)
-				{
-					Button[i][Buttons[i]++] = iButtons;
-				}
-			}
 			float fAng[3];
 			GetClientEyeAngles(i, fAng);
-			if(LastAngle[i] == fAng[0])
+			if(ClientLastAngle[i] == fAng[0])
 			{
-				if(++SameAngles[i] < 5)
+				if(++ClientData[i][CLIENT_SAME_ANGLES_TICKS] < 5)
 				{
-					TempOnline[i]++;
+					ClientData[i][CLIENT_ONLINE_CLEAN]++;
+					ClientData[i][CLIENT_ONLINE_DYNAMIC_CLEAN]++;
 				}
 			}
 			else
 			{
-				SameAngles[i] = 0;
-				TempOnline[i]++;
+				ClientData[i][CLIENT_SAME_ANGLES_TICKS] = 0;
+				ClientData[i][CLIENT_ONLINE_CLEAN]++;
+				ClientData[i][CLIENT_ONLINE_DYNAMIC_CLEAN]++;
 			}
-			LastAngle[i] = fAng[0];
+			ClientLastAngle[i] = fAng[0];
 			
 		}
-		LastPosition[i] = fPos;
+		ClientLastPos[i] = fPos;
 	}
 }
 
 public void ConnectCallBack(Database hDatabase, const char[] sError, any data) // Пришел результат соеденения
 {
-	if (hDatabase == null)	// Соединение  не удачное
+	if (hDatabase == null)
 	{
-		SetFailState("Database failure: %s", sError); // Отключаем плагин
-		return;
+		SetFailState("Database failure: %s", sError);
 	}
 
-	g_hDatabase = hDatabase; // Присваиваем глобальной переменной соеденения значение текущего соеденения
-	
-	
-	SQL_LockDatabase(g_hDatabase); // Блокируем базу для других запросов
+	g_hDatabase = hDatabase; 
+	Transaction hTxn = new Transaction();
 
-	g_hDatabase.Query(SQL_Callback_CheckError,	"CREATE TABLE IF NOT EXISTS `toponline` (\
-															`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\
-															`auth` VARCHAR(32) NOT NULL,\
+	hTxn.AddQuery("CREATE TABLE IF NOT EXISTS `total_online` (\
+															`id` INTEGER NOT NULL PRIMARY KEY,\
 															`name` VARCHAR(32) NOT NULL default 'unknown',\
-															`last_connect` INTEGER UNSIGNED NOT NULL,\
-															`online` INTEGER NOT NULL default '0');");
-	SQL_UnlockDatabase(g_hDatabase); // Разблокируем базу
-	
-	g_hDatabase.SetCharset("utf8"); // Устанавливаем кодировку
+															`online_clean` INTEGER NOT NULL default '0',\
+															`online_total` INTEGER NOT NULL default '0');");
+	hTxn.AddQuery("CREATE TABLE IF NOT EXISTS `dynamic_online` (\
+															`client_id` INTEGER NOT NULL PRIMARY KEY,\
+															`start_time` INTEGER NOT NULL default '0',\
+															`online_clean` INTEGER NOT NULL default '0',\
+															`online_total` INTEGER NOT NULL default '0');");
+
+	g_hDatabase.Execute(hTxn, SQL_Callback_TxnSuccess, SQL_Callback_TxnFailure);
+
+
+}
+
+public void SQL_Callback_TxnFailure(Database db, any data, int numQueries, const char[] error, int failIndex, any[] queryData)
+{
+	SetFailState("Cant create table (%i): %s", failIndex, error);
+}
+
+public void SQL_Callback_TxnSuccess(Database hDatabase, int iData, int iNumQueries, DBResultSet[] results, any[] QueryData)
+{
+	DatabaseIsLoaded = true;
+
+	g_hDatabase.SetCharset("utf8");
 	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i))
 		{
-			OnClientPostAdminCheck(i);
+			OnClientPutInServer(i);
 		}
 	}
 	OnMapStart();
+	//ImportDBFromFile();
 }
 
 public void SQL_Callback_CheckError(Database hDatabase, DBResultSet results, const char[] szError, any data)
@@ -330,50 +426,55 @@ public void SQL_Callback_CheckError(Database hDatabase, DBResultSet results, con
 	}
 }
 
-public void OnClientPostAdminCheck(int iClient)
+public void OnClientPutInServer(int iClient)
 {
-	if(!IsFakeClient(iClient))
+	ResetClientData(iClient);
+
+	if(!DatabaseIsLoaded || IsFakeClient(iClient))
 	{
-		char szQuery[256], szAuth[32];
-		GetClientAuthId(iClient, AuthId_Engine, szAuth, sizeof(szAuth), true);
-		FormatEx(szQuery, sizeof(szQuery), "SELECT `id`, `online` FROM `toponline` WHERE `auth` = '%s';", szAuth);
+		return;
+	}
+
+	ClientData[iClient][CLIENT_ID] = GetSteamAccountID(iClient, true);
+
+	if(ClientData[iClient][CLIENT_ID])
+	{
+		char szQuery[256];
+		FormatEx(szQuery, sizeof(szQuery), "SELECT `online_clean`, `online_total` FROM `total_online` WHERE `id` = %i LIMIT 1;", ClientData[iClient][CLIENT_ID]);
 		g_hDatabase.Query(SQL_Callback_SelectClient, szQuery, GetClientUserId(iClient));
+
 	}
 }
 
 public void SQL_Callback_SelectClient(Database hDatabase, DBResultSet hResults, const char[] sError, any iUserID)
 {
-	if(sError[0]) // Если произошла ошибка
+	if(sError[0])
 	{
-		LogError("SQL_Callback_SelectClient: %s", sError); // Выводим в лог
-		return; // Прекращаем выполнение ф-и
+		LogError("SQL_Callback_SelectClient: %s", sError);
+		return;
 	}
-	
 	int iClient = GetClientOfUserId(iUserID);
-	if(iClient)
+	if(iClient && IsClientInGame(iClient))
 	{
 		char szQuery[256], szName[MAX_NAME_LENGTH*2+1];
 		GetClientName(iClient, szQuery, MAX_NAME_LENGTH);
-		g_hDatabase.Escape(szQuery, szName, sizeof(szName)); // Экранируем запрещенные символы в имени
+		g_hDatabase.Escape(szQuery, szName, sizeof(szName));
 
-		// Игрок всё еще на сервере
-		if(hResults.FetchRow())	// Игрок есть в базе
+		if(hResults.FetchRow())
 		{
-			// Получаем значения из результата
-			ID[iClient] = hResults.FetchInt(0);	// id
-			Online[iClient] = hResults.FetchInt(1);
+			Bit_SetClientInfo(iClient, CLIENT_INFO_AUTHORIZED, true);
+			CheckClientLoading(iClient);
+			ClientData[iClient][CLIENT_ONLINE_CLEAN] = hResults.FetchInt(0);
+			ClientData[iClient][CLIENT_ONLINE_TOTAL] = hResults.FetchInt(1);
 
-			// Обновляем в базе ник и дату последнего входа
-			FormatEx(szQuery, sizeof(szQuery), "UPDATE `toponline` SET `last_connect` = %i, `name` = '%s' WHERE `id` = %i;", GetTime(), szName, ID[iClient]);
+			FormatEx(szQuery, sizeof(szQuery), "UPDATE `total_online` SET `name` = '%s' WHERE `id` = %i;", szName, ClientData[iClient][CLIENT_ID]);
 			g_hDatabase.Query(SQL_Callback_CheckError, szQuery);
+
+			GetClientSession(iClient);
 		}
 		else
 		{
-			Online[iClient] = 0;
-
-			char szAuth[32];
-			GetClientAuthId(iClient, AuthId_Engine, szAuth, sizeof(szAuth));
-			FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `toponline` (`auth`, `name`, `last_connect`) VALUES ( '%s', '%s', %i);", szAuth, szName, GetTime());
+			FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `total_online` (`id`, `name`, `online_total`, `online_clean`) VALUES (%i, '%s', 0, 0);", ClientData[iClient][CLIENT_ID], szName);
 			g_hDatabase.Query(SQL_Callback_CreateClient, szQuery, GetClientUserId(iClient));
 		}
 	}
@@ -388,35 +489,115 @@ public void SQL_Callback_CreateClient(Database hDatabase, DBResultSet results, c
 	}
 	
 	int iClient = GetClientOfUserId(iUserID);
-	if(iClient)
+	if(iClient && IsClientInGame(iClient))
 	{
-		ID[iClient] = results.InsertId; // Получаем ID только что добавленного игрока
+		Bit_SetClientInfo(iClient, CLIENT_INFO_AUTHORIZED, true);
+		CreateClientSession(iClient);
 	}
+}
+
+stock void GetClientSession(int iClient)
+{
+	if(ClientData[iClient][CLIENT_ONLINE_CLEAN] >= cvarDynamicMinAllTime.IntValue)
+	{
+		char szQuery[512];
+		FormatEx(szQuery, sizeof(szQuery), "SELECT `start_time`, `online_clean`, `online_total` FROM `dynamic_online` WHERE `client_id` = %i ORDER BY `start_time` DESC LIMIT 1;", ClientData[iClient][CLIENT_ID]);
+		g_hDatabase.Query(SQL_Callback_GetClientSession, szQuery, GetClientUserId(iClient));
+	}
+	else
+	{
+		Bit_SetClientInfo(iClient, CLIENT_INFO_SESSION_LOADED, true);
+		CheckClientLoading(iClient);
+	}
+}
+
+public void SQL_Callback_GetClientSession(Database hDatabase, DBResultSet hResults, const char[] sError, int iClient)
+{
+	if(sError[0])
+	{
+		LogError("SQL_Callback_GetClientSession: %s", sError);
+		return;
+	}
+	
+	if(!hResults || (iClient = GetClientOfUserId(iClient)) == 0 || !IsClientInGame(iClient))
+	{
+		return;
+	}
+
+	if(hResults.FetchRow())
+	{
+		int iStartSessionTime = hResults.FetchInt(0);
+
+		if(GetTime() - iStartSessionTime <= cvarDynamicMaxSessionTime.IntValue)
+		{
+			ClientData[iClient][CLIENT_ONLINE_DYNAMIC_SESSION_TIME] = iStartSessionTime;
+			ClientData[iClient][CLIENT_ONLINE_DYNAMIC_CLEAN] = hResults.FetchInt(1);
+			ClientData[iClient][CLIENT_ONLINE_DYNAMIC_TOTAL] = hResults.FetchInt(2);
+
+			Bit_SetClientInfo(iClient, CLIENT_INFO_SESSION_LOADED, true);
+			CheckClientLoading(iClient);
+			return;
+		}
+	}
+	CreateClientSession(iClient);
+}
+
+stock void CreateClientSession(int iClient)
+{
+	if(ClientData[iClient][CLIENT_ONLINE_CLEAN] >= cvarDynamicMinAllTime.IntValue)
+	{
+		ClientData[iClient][CLIENT_ONLINE_DYNAMIC_SESSION_TIME] = GetTime();
+		char szQuery[512];
+		FormatEx(szQuery, sizeof(szQuery), "INSERT INTO `dynamic_online` (`client_id`, `start_time`, `online_clean`, `online_total`) VALUES (%i, %i, 0, 0);", ClientData[iClient][CLIENT_ID], ClientData[iClient][CLIENT_ONLINE_DYNAMIC_SESSION_TIME]);
+		g_hDatabase.Query(SQL_Callback_CreateClientSession, szQuery, GetClientUserId(iClient));
+	}
+}
+
+public void SQL_Callback_CreateClientSession(Database hDatabase, DBResultSet hResults, const char[] sError, int iClient)
+{
+	if(sError[0])
+	{
+		LogError("SQL_Callback_CreateClientSession: %s", sError);
+		return;
+	}
+	
+	if((iClient = GetClientOfUserId(iClient)) == 0 || !IsClientInGame(iClient))
+	{
+		return;
+	}
+
+	Bit_SetClientInfo(iClient, CLIENT_INFO_SESSION_LOADED, true);
+	CheckClientLoading(iClient);
 }
 
 public void OnClientDisconnect(int iClient)
 {
-	if(!IsFakeClient(iClient))
+	char szQuery[512];
+	if(Bit_GetClientInfo(iClient, CLIENT_INFO_AUTHORIZED))
 	{
-		LastAngle[iClient] =
-		LastPosition[iClient][0] =
-		LastPosition[iClient][1] =
-		LastPosition[iClient][2] = 0.0;
-		SameAngles[iClient] = 0;
-		
-		if(TempOnline[iClient])
-		{
-			if(!ButtonsToggle || (LastAverage && Buttons[iClient] >= LastAverage))
-			{
-				Online[iClient] += TempOnline[iClient];
-			}
-			TempOnline[iClient] = 0;
-		}
-		
-		char szQuery[512];
-		FormatEx(szQuery, sizeof(szQuery), "UPDATE `toponline` SET `online` = %i WHERE `id` = %i;", Online[iClient], ID[iClient]);
+		FormatEx(szQuery, sizeof(szQuery), "UPDATE `total_online` SET `online_clean` = %i, `online_total` = %i WHERE `id` = %i;", ClientData[iClient][CLIENT_ONLINE_CLEAN], ClientData[iClient][CLIENT_ONLINE_TOTAL], ClientData[iClient][CLIENT_ID]);
 		g_hDatabase.Query(SQL_Callback_CheckError, szQuery);
 	}
+	if(Bit_GetClientInfo(iClient, CLIENT_INFO_SESSION_LOADED) && ClientData[iClient][CLIENT_ONLINE_DYNAMIC_SESSION_TIME])
+	{
+		FormatEx(szQuery, sizeof(szQuery), "UPDATE `dynamic_online` SET `online_clean` = %i, `online_total` = %i WHERE `client_id` = %i and `start_time` = %i;", ClientData[iClient][CLIENT_ONLINE_DYNAMIC_CLEAN], ClientData[iClient][CLIENT_ONLINE_DYNAMIC_TOTAL], ClientData[iClient][CLIENT_ID], ClientData[iClient][CLIENT_ONLINE_DYNAMIC_SESSION_TIME]);
+		g_hDatabase.Query(SQL_Callback_CheckError, szQuery);
+	}
+
+	ResetClientData(iClient);
+}
+
+void ResetClientData(int iClient)
+{
+	for(int i; i < CLIENT_DATA_TOTAL; i++)
+	{
+		ClientData[iClient][i] = 0;
+	}
+
+	ClientLastAngle[iClient] = 0.0;
+	ClientLastPos[iClient][0] = 0.0;
+	ClientLastPos[iClient][1] = 0.0;
+	ClientLastPos[iClient][2] = 0.0;
 }
 
 void FormatTime2(int iSeconds, char[] buffer, int iSize)
@@ -436,5 +617,64 @@ void FormatTime2(int iSeconds, char[] buffer, int iSize)
 	}
 	
 	
-	FormatEx(buffer, iSize, "%i h, %i min, %i sec", iHours, iMinutes, iSeconds);
+	FormatEx(buffer, iSize, "%i h", iHours);
+}
+
+stock int GetIntervalIdByName(const char[] name)
+{
+	for(int i; i < sizeof(intervalNames); i++)
+	{
+		if(!strcmp(name, intervalNames[i], false))
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+stock bool Bit_GetClientInfo(int iClient, int iInfo)
+{
+	return !!(ClientData[iClient][CLIENT_INFO] & iInfo);
+}
+
+stock bool Bit_SetClientOppInfo(int iClient, int iInfo)
+{
+	return !!((ClientData[iClient][CLIENT_INFO] ^= iInfo) & iInfo);
+}
+
+void Bit_SetClientInfo(int iClient, int iInfo, bool bToggle)
+{
+	if(bToggle)
+	{
+		ClientData[iClient][CLIENT_INFO] |= iInfo;
+	}
+	else
+	{
+		ClientData[iClient][CLIENT_INFO] &= ~iInfo;
+		
+	}
+}
+
+
+void CheckClientLoading(int iClient)
+{
+	if(Bit_GetClientInfo(iClient, CLIENT_INFO_LOADED))
+	{
+		return;
+	}
+
+	if(Bit_GetClientInfo(iClient, CLIENT_INFO_AUTHORIZED) && Bit_GetClientInfo(iClient, CLIENT_INFO_SESSION_LOADED))
+	{
+		Bit_SetClientInfo(iClient, CLIENT_INFO_LOADED, true);
+		OnClientLoaded(iClient);
+	}
+}
+
+stock void OnClientLoaded(int iClient)
+{
+	if(iClient)
+	{
+
+	}
 }
