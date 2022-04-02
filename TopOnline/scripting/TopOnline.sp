@@ -114,7 +114,7 @@ public void OnMapStart()
 		}
 		if(!TopMenusCountCurrentQueries[i])
 		{
-			PrintToConsoleAll(szBuffer);
+			//PrintToConsoleAll(szBuffer);
 			g_hDatabase.Query(SQL_GetTOP, szBuffer, i);
 		}
 	}
@@ -123,8 +123,8 @@ public void OnMapStart()
 	TimerOnline = CreateTimer(1.0, Timer_CheckPosition, _, TIMER_FLAG_NO_MAPCHANGE | TIMER_REPEAT);
 }
 
-/*
-int g_iCount;
+
+/*int g_iCount;
 stock void ImportDBFromFile()
 {
 	int iSymbol, iSymbol2, iAccount, iOnline;
@@ -164,8 +164,8 @@ public void SQL_Callback_CheckError2(Database hDatabase, DBResultSet results, co
 	{
 		LogError("SQL_Callback_CheckError: %s", szError);
 	}
-}
- */
+}*/
+ 
 public void OnMapEnd()
 {
 	TimerOnline = null;
@@ -209,7 +209,7 @@ public void SQL_GetTOP(Database hDatabase, DBResultSet hResults, const char[] sE
 			int iId;
 			DataPack hPack;
 			DataPack hPack2 = new DataPack();
-			PrintToConsoleAll("%i", hResults.RowCount);
+			//PrintToConsoleAll("%i", hResults.RowCount);
 			while(hResults.FetchRow())
 			{
 				iId = hResults.FetchInt(0);
@@ -219,7 +219,7 @@ public void SQL_GetTOP(Database hDatabase, DBResultSet hResults, const char[] sE
 				hPack.WriteCell(iCleanOnline);
 				hPack.WriteCell(view_as<int>(hPack2));
 				FormatEx(szBuffer, 256, "SELECT `name` from `total_online` WHERE `id` = %i", iId);
-				PrintToConsoleAll("r = %i\nq=%s", iId, szBuffer);
+				//PrintToConsoleAll("r = %i\nq=%s", iId, szBuffer);
 				g_hDatabase.Query(SQL_GetClientName, szBuffer, hPack);
 				iPosition++;
 				TopMenusCountCurrentQueries[iTopID]++;
@@ -387,7 +387,7 @@ public void ConnectCallBack(Database hDatabase, const char[] sError, any data) /
 															`online_clean` INTEGER NOT NULL default '0',\
 															`online_total` INTEGER NOT NULL default '0');");
 	hTxn.AddQuery("CREATE TABLE IF NOT EXISTS `dynamic_online` (\
-															`client_id` INTEGER NOT NULL PRIMARY KEY,\
+															`client_id` INTEGER NOT NULL,\
 															`start_time` INTEGER NOT NULL default '0',\
 															`online_clean` INTEGER NOT NULL default '0',\
 															`online_total` INTEGER NOT NULL default '0');");
@@ -523,7 +523,6 @@ public void SQL_Callback_GetClientSession(Database hDatabase, DBResultSet hResul
 	{
 		return;
 	}
-
 	if(hResults.FetchRow())
 	{
 		int iStartSessionTime = hResults.FetchInt(0);
