@@ -10,8 +10,8 @@
 #define PLUGIN_VERSION "1.2"
 
 // Admin Level Defines: Level for Allowing Temp.Spray/Temp.Remove of Decals and Level for Saving Decals/getting aim position
-#define ADMIN_LEVEL_SPRAY	ADMFLAG_CUSTOM3
-#define ADMIN_LEVEL_SAVE	ADMFLAG_ROOT
+#define ADMIN_LEVEL_SPRAY	ADMFLAG_UNBAN
+#define ADMIN_LEVEL_SAVE	ADMFLAG_UNBAN
 
 // Mode Defines for Function ReadDecals
 #define READ	0

@@ -1,0 +1,60 @@
+"Phrases"
+{
+	"Tag"
+	{
+		"ru"		"[KnifeExplode]"
+		"en"		"[KnifeExplode]"
+	}
+	"The limit of explosions per round is reached"
+	{
+		"#format"	"{1:i}"
+		"ru"		"Достигнут лимит общего количество взрывов Зомби за раунд (Макс: {1})"
+		"en"		"The limit of explosions per round is reached (Max: {1})"
+	}
+	"You have reached the limit of explosions per round"
+	{
+		"#format"	"{1:i}"
+		"ru"		"Ты достиг лимит взрывов Зомби за раунд (Макс: {1})"
+		"en"			"You have reached the limit of explosions per round (Max: {1})"
+	}
+	"Not enough time has passed"
+	{
+		"#format"	"{1:i}"
+		"ru"		"Прошло недостаточно времени, осталось {1} сек."
+		"en"		"Not enough time has passed, {1} sec left"
+	}
+	"This zombie is already mined"
+	{
+		"ru"		"Этот Зомби уже заминирован"
+		"en"		"This zombie is already mined"
+	}
+	"Not enough zombies"
+	{
+		"#format"	"{1:i}"
+		"ru"		"Недостаточно зомби для минирования (Мин: {1})"
+		"en"		"Not enough zombies (Min: {1})"
+	}
+	"You have successfully mined"
+	{
+		"#format"	"{1:N},{2:i}"
+		"ru"		"Ты успешно заминировал {1}. У него есть {2} сек чтобы заразить кого-то и разминироваться."
+		"en"		"You successfully mined {1}. He has {2} sec to infect someone to save himself."
+	}
+	"You were laid"
+	{
+		"#format"	"{1:N},{2:i}"
+		"ru"		"Ты был заминирован игроком {1}. У тебя есть {2} секунд, чтобы заразить кого-то и спастись."
+		"en"		"You were mined by {1}. You have {2} sec to infect someone and save yourself."
+	}
+	"You were saved from the explosion"
+	{
+		"ru"		"Ты был спасён от взрыва!"
+		"en"		"You were saved from the explosion!"
+	}
+	"Zombie infected human and was rescued from the explosion"
+	{
+		"#format"	"{1:N},{2:N}"
+		"ru"		"{1} заразил {2} и был спасен от взрыва"
+		"en"		"{1} infected {2} and was rescued from the explosion"
+	}
+}

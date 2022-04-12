@@ -21,7 +21,7 @@ public void OnPluginStart()
 	CreateTimer(1.0, Timer_Auth);
 	HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
 	
-	RegAdminCmd("ttt", TestC, ADMFLAG_GENERIC);
+	//RegAdminCmd("ttt", TestC, ADMFLAG_GENERIC);
 }
 
 public Action TestC(int iC, int iA)
