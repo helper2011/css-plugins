@@ -1,15 +1,39 @@
+#include <sourcemod>
 #include <clientprefs>
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 
 #pragma newdecls required
 
+enum
+{
+	SOUND_ROUND_START,
+	SOUND_KILL,
+	SOUND_KNIFE,
+	SOUND_HEADSHOT,
+	SOUND_HEGRENADE,
+
+	SOUND_TOTAL
+}
+
+static const char soundsKeys[][] = 
+{
+	"round_start",
+	"kill",
+	"knife",
+	"headshot",
+	"hegrenade"
+}
+
 Handle Ccookie;
 
-bool Toggle[MAXPLAYERS + 1];
-float Volume[MAXPLAYERS + 1];
+bool Toggle[MAXPLAYERS + 1] = {true, ...};
 
-ArrayList Sounds[5];
+ArrayList Sounds[SOUND_TOTAL];
+
+int Chance[SOUND_TOTAL] = {100, ...};
+
+float Cooldown, CooldownClient, CooldownKeys[SOUND_TOTAL], NextTimeKeyPlay[SOUND_TOTAL], NextTimePlay, NextTimeClientPlay[MAXPLAYERS + 1];
 
 public Plugin myinfo = 
 {
@@ -23,13 +47,23 @@ public void OnPluginStart()
 {
 	HookEvent("player_death", OnPlayerDeath);
 	HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
-	
+	SetCookieMenuItem(CookieMenuH, 0, "Kill Sounds");
 	Ccookie = RegClientCookie("KillSoundsSets", "", CookieAccess_Private);
 	
-	RegConsoleCmd("ks", Command_KillSounds);
 	RegConsoleCmd("killsounds", Command_KillSounds);
 
 	LoadSounds();
+
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(!IsClientInGame(i))
+			continue;
+
+		if(AreClientCookiesCached(i))
+		{
+			OnClientCookiesCached(i);
+		}
+	}
 }
 
 public void OnMapStart()
@@ -37,104 +71,59 @@ public void OnMapStart()
 	PrecacheSounds();
 }
 
-public Action Command_KillSounds(int iClient, int iArgs)
+public void OnMapEnd()
 {
-	KillSounds(iClient);
-	return Plugin_Handled;
+	NextTimePlay = 0.0;
+	
+	for(int i; i < SOUND_TOTAL; i++)
+	{
+		NextTimeKeyPlay[i] = 0.0;
+	}
 }
 
-void KillSounds(int iClient)
-{
-	char szBuffer[256];
-	Menu hMenu = new Menu(KillSoundsMenu, MenuAction_End | MenuAction_Cancel | MenuAction_Select);
-	hMenu.SetTitle("Kill Sounds");
-	FormatEx(szBuffer, 256, "Toggle: [%s]", Toggle[iClient] ? "✔":"×");				hMenu.AddItem("", szBuffer);
-	FormatEx(szBuffer, 256, "Volume: [%i%%]", RoundToNearest(Volume[iClient] * 100.0));	hMenu.AddItem("", szBuffer);
-	hMenu.Display(iClient, 0);
-}
-
-public int KillSoundsMenu(Menu hMenu, MenuAction action, int iClient, int iItem)
+public void CookieMenuH(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
 {
 	switch(action)
 	{
-		case MenuAction_End:
+		case CookieMenuAction_DisplayOption:
 		{
-			delete hMenu;
+			FormatEx(buffer, maxlen, "Kill Sounds: [%s]", Toggle[client] ? "✔":"×");
 		}
-		case MenuAction_Cancel:
+		case CookieMenuAction_SelectOption:
 		{
-			char szBuffer[64];
-			if(!Toggle[iClient] || Volume[iClient] != 1.0)
-			{
-				FormatEx(szBuffer, 256, "%i;%i", Toggle[iClient] ? 1:0, RoundToNearest(Volume[iClient] * 100.0));
-			}
-			SetClientCookie(iClient, Ccookie, szBuffer);
-		}
-		case MenuAction_Select:
-		{
-			switch(iItem)
-			{
-				case 0:
-				{
-					Toggle[iClient] = !Toggle[iClient];
-				}
-				case 1:
-				{
-					if((Volume[iClient] += 0.01) > 1.0)
-					{
-						Volume[iClient] = 0.8;
-					}
-				}
-				
-			}
-			KillSounds(iClient);
+			ToggleClientKillSounds(client);
+			ShowCookieMenu(client);
 		}
 	}
+}
 
+public Action Command_KillSounds(int iClient, int iArgs)
+{
+	ToggleClientKillSounds(iClient);
+	return Plugin_Handled;
 }
 
 public void OnClientCookiesCached(int iClient)
 {
 	if(IsFakeClient(iClient))
 	{
-		Toggle[iClient] = false;
 		return;
 	}
 	
-	Toggle[iClient] = true;
-	Volume[iClient] = 1.0;
-	
-	char szBuffer[64];
-	GetClientCookie(iClient, Ccookie, szBuffer, 64);
-	if(szBuffer[0])
-	{
-		int iSymbol = FindCharInString(szBuffer, ';');
-		if(iSymbol != -1)
-		{
-			Volume[iClient] = float(StringToInt(szBuffer[iSymbol + 1])) / 100.0;
-			szBuffer[iSymbol] = 0;
-			Toggle[iClient] = !!(StringToInt(szBuffer));
-		}
-	}
+	char szBuffer[4];
+	GetClientCookie(iClient, Ccookie, szBuffer, 4);
+	Toggle[iClient] = (szBuffer[0] == 0);
 }
 
-public void OnClientPutInServer(int iClient)
+public void OnClientDisconnect(int iClient)
 {
-	if(IsFakeClient(iClient))
-	{
-		Toggle[iClient] = false;
-		return;
-	}
-	else if(!AreClientCookiesCached(iClient))
-	{
-		Toggle[iClient] = true;
-		Volume[iClient] = 1.0;
-	}
+	Toggle[iClient] = true;
+	NextTimeClientPlay[iClient] = 0.0;
 }
 
 public void OnRoundStart(Event hEvent, const char[] event, bool bDontBroadcast)
 {
-	PlaySound(0);
+	PlaySound(SOUND_ROUND_START);
 }
 
 public void OnPlayerDeath(Event hEvent, const char[] event, bool bDontBroadcast)
@@ -142,12 +131,17 @@ public void OnPlayerDeath(Event hEvent, const char[] event, bool bDontBroadcast)
 	static int iAttacker;
 	static int iClient;
 	static int iType;
-	if(!(0 < (iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"))) <= MaxClients) || IsFakeClient(iAttacker) || GetClientTeam(iAttacker) != 3 || iAttacker == (iClient = GetClientOfUserId(hEvent.GetInt("userid"))) || GetClientTeam(iClient) != 2)
+	if(!(0 < (iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"))) <= MaxClients) || GetClientTeam(iAttacker) != 3 || iAttacker == (iClient = GetClientOfUserId(hEvent.GetInt("userid"))) || GetClientTeam(iClient) != 2)
 		return;
 
-	iType = !!(hEvent.GetBool("headshot"));
-	if(iType == 0 && (iType = GetEventWeapon(hEvent)) == -1)
-		iType = 4;
+	if(hEvent.GetBool("headshot"))
+	{
+		iType = SOUND_HEADSHOT;
+	}
+	else
+	{
+		iType = GetEventWeapon(hEvent);
+	}
 	
 	PlaySound(iType, iAttacker);
 }
@@ -157,44 +151,65 @@ int GetEventWeapon(Event hEvent)
 	char szBuffer[4];
 	hEvent.GetString("weapon", szBuffer, 4);
 	if(szBuffer[0] == 'k')								// knife
-		return 2;
+		return SOUND_KNIFE;
 	else if(szBuffer[0] == 'h') 						// hegrenade
-		return 3;
+		return SOUND_HEGRENADE;
 		
-	return -1;
+	return SOUND_KILL;
 }
 
 void LoadSounds()
 {
 	char szBuffer[256];
-	char symbols[5] = "rhkgs";
 
 	KeyValues hKeyValues = new KeyValues("KillSounds");
 	BuildPath(Path_SM, szBuffer, 256, "configs/killsounds.cfg");
-	if(!hKeyValues.ImportFromFile(szBuffer) || !hKeyValues.GotoFirstSubKey(false))
+	if(!hKeyValues.ImportFromFile(szBuffer))
 		SetFailState("[Killsounds] Config \"%s\" does exists...", szBuffer);
 		
-	for(int i; i < 5; i++)
+	for(int i; i < SOUND_TOTAL; i++)
 	{
 		delete Sounds[i];
 		Sounds[i] = new ArrayList(ByteCountToCells(256));
 	}
-		
-	do
+
+
+	if(hKeyValues.JumpToKey("Cooldowns"))
 	{
-		hKeyValues.GetSectionName(szBuffer, 256);
-		for(int i;i < 5; i++)
+		Cooldown = hKeyValues.GetFloat("cooldown");
+		CooldownClient = hKeyValues.GetFloat("cooldown_client");
+
+		for(int i; i < SOUND_TOTAL; i++)
 		{
-			if(szBuffer[0] == symbols[i])
-			{
-				hKeyValues.GetString(NULL_STRING, szBuffer, 256);
-				Sounds[i].PushString(szBuffer);
-				break;
-			}
-				
+			CooldownKeys[i] = hKeyValues.GetFloat(soundsKeys[i]);
 		}
+		hKeyValues.Rewind();
 	}
-	while(hKeyValues.GotoNextKey(false));
+	if(hKeyValues.JumpToKey("Chances"))
+	{
+		for(int i; i < SOUND_TOTAL; i++)
+		{
+			Chance[i] = hKeyValues.GetNum(soundsKeys[i], 100);
+		}
+		hKeyValues.Rewind();
+	}
+	
+	if(hKeyValues.JumpToKey("Sounds") && hKeyValues.GotoFirstSubKey(false))
+	{
+		int iIndex;
+		do
+		{
+			hKeyValues.GetSectionName(szBuffer, 256);
+			
+			if((iIndex = GetSoundKeyIndex(szBuffer)) == -1)
+				continue;
+
+			hKeyValues.GetString(NULL_STRING, szBuffer, 256);
+			Sounds[iIndex].PushString(szBuffer);
+		}
+		while(hKeyValues.GotoNextKey(false));
+	}
+
 	
 	delete hKeyValues;
 }
@@ -218,6 +233,35 @@ void PrecacheSounds()
 
 void PlaySound(int iType, int iEntity = SOUND_FROM_PLAYER)
 {
+	if(Chance[iType] < GetRandomInt(1, 100))
+		return;
+
+	static float fTime;
+	fTime = GetGameTime();
+
+	if(fTime < NextTimeKeyPlay[iType])
+		return;
+
+	if(fTime < NextTimePlay)
+		return;
+
+	if(iEntity != SOUND_FROM_PLAYER)
+	{
+		if(!Toggle[iEntity])
+		{
+			return;
+		}
+		if(fTime < NextTimeClientPlay[iEntity])
+		{
+			return;
+		}
+
+		NextTimeClientPlay[iEntity] = fTime + CooldownClient;
+	}
+
+	NextTimePlay = fTime + Cooldown;
+	NextTimeKeyPlay[iType] = fTime + CooldownKeys[iType];
+
 	static int iLength;
 	static char szBuffer[256];
 	iLength = Sounds[iType].Length;
@@ -229,8 +273,32 @@ void PlaySound(int iType, int iEntity = SOUND_FROM_PLAYER)
 		{
 			if(IsClientInGame(i) && Toggle[i])
 			{
-				EmitSoundToClient(i, szBuffer, iEntity, _, SNDLEVEL_GUNFIRE, _, Volume[i]);
+				EmitSoundToClient(i, szBuffer, iEntity, SNDCHAN_STATIC, SNDLEVEL_NORMAL, _, 1.0);
 			}
 		}
 	}
+}
+
+stock void ToggleClientKillSounds(int iClient)
+{
+	Toggle[iClient] = !Toggle[iClient];
+	PrintHintText(iClient, "Kill Sounds: [%s]", Toggle[iClient] ? "✔":"×")
+
+	if(AreClientCookiesCached(iClient))
+	{
+		SetClientCookie(iClient, Ccookie, Toggle[iClient] ? "":"0");
+	}
+}
+
+stock int GetSoundKeyIndex(const char[] key)
+{
+	for(int i; i < SOUND_TOTAL; i++)
+	{
+		if(strcmp(key, soundsKeys[i], false) == 0)
+		{
+			return i;
+		}
+	}
+
+	return -1;
 }

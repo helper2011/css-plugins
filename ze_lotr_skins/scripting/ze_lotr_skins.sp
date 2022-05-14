@@ -20,18 +20,6 @@ public void OnPluginStart()
 {
 	CreateTimer(1.0, Timer_Auth);
 	HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
-	
-	//RegAdminCmd("ttt", TestC, ADMFLAG_GENERIC);
-}
-
-public Action TestC(int iC, int iA)
-{
-	if(iC && !IsFakeClient(iC) && IsPlayerAlive(iC) && iA == 1)
-	{
-		char szBuffer[32];
-		GetCmdArg(1, szBuffer, 32);
-		EmitSoundToAll("sibgamers/lotr/gandalf/prepare.mp3", SOUND_FROM_PLAYER, _, StringToInt(szBuffer));
-	}
 }
 
 public void OnMapStart()
@@ -114,8 +102,8 @@ public void OnMapStart()
 		AddFileToDownloadsTable("models/player/slow/amberlyn/lotr/gandalf/slow.sw.vtx");
 		AddFileToDownloadsTable("models/player/slow/amberlyn/lotr/gandalf/slow.vvd");
 		
-		PrecacheSound("sibgamers/lotr/gandalf/prepare.mp3", true);
-		AddFileToDownloadsTable("sound/sibgamers/lotr/gandalf/prepare.mp3");
+		//PrecacheSound("sibgamers/lotr/gandalf/prepare.mp3", true);
+		//AddFileToDownloadsTable("sound/sibgamers/lotr/gandalf/prepare.mp3");
 		
 	}
 	if((OtherSkins |= (hKeyValues.GetNum("Aragorn") << 0)) & (1 << 0))
@@ -399,19 +387,19 @@ public void OnWeaponEquip(int iClient, int iWeapon)
 				GandalfOwner = iClient;
 				SetEntityModel(iClient, "models/player/slow/amberlyn/lotr/gandalf/slow.mdl");
 				
-				CreateTimer(1.0, Timer_PlayGandalf, iClient);
+				//CreateTimer(1.0, Timer_PlayGandalf, iClient);
 			}
 		}
 	}
 }
 
-public Action Timer_PlayGandalf(Handle hTimer, int iClient)
+/*public Action Timer_PlayGandalf(Handle hTimer, int iClient)
 {
 	if(IsClientInGame(iClient) && IsPlayerAlive(iClient) && GandalfOwner == iClient)
 	{
 		EmitSoundToAll("sibgamers/lotr/gandalf/prepare.mp3", iClient);
 	}
-}
+}*/
 
 int GetWeaponId(int iWeapon)
 {

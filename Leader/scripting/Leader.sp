@@ -418,7 +418,8 @@ void LeaderMenu(int iClient, int iItem = 0)
 	Menu hMenu = new Menu(LeaderMenuH);
 	hMenu.SetTitle("%T", "Leader menu title", iClient);
 	AddMenuItem2(hMenu, Toggle[0] && Leader[iClient] ?					ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED, "", "%T", Module[0], iClient);
-	AddMenuItem2(hMenu, Toggle[1] && Leader[iClient] ?					ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED, "", "%T [%s]", Module[1], iClient, Beacon[iClient] ? "✔":"×");
+	//AddMenuItem2(hMenu, Toggle[1] && Leader[iClient] ?					ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED, "", "%T [%s]", Module[1], iClient, Beacon[iClient] ? "✔":"×");
+	AddMenuItem2(hMenu, ITEMDRAW_DISABLED, "", "%T [%s]", Module[1], iClient, Beacon[iClient] ? "✔":"×");
 	AddMenuItem2(hMenu, Toggle[2] && Leader[iClient] && SCIsLoaded ?	ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED, "", "%T [%s]", Module[2], iClient, Mute ? "✔":"×");
 
 	AddMenuItem2(hMenu, Leader[iClient] ? ITEMDRAW_DEFAULT:ITEMDRAW_DISABLED, "", "%T", "Leave lead", iClient);
@@ -634,7 +635,7 @@ int CreateMarker(int iClient, float fPos[3], float fAng[3])
 	
 	DispatchKeyValue(iEntity, "model", "models/expert_zone/pingtool/pingtool.mdl");
 	DispatchSpawn(iEntity);
-	SetEntPropFloat(iEntity, Prop_Send, "m_flModelScale", 2.0);
+	SetEntPropFloat(iEntity, Prop_Send, "m_flModelScale", 2.5);
 	TeleportEntity(iEntity, fPos, fAng, NULL_VECTOR);
 	
 	delete g_hTimer2[iClient];

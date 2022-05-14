@@ -28,9 +28,9 @@ public void OnPluginStart()
 	HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
 	HookEvent("player_hurt", OnPlayerHurt);
 	HookEvent("player_spawn", OnPlayerSpawn);
-	cvarSound = CreateConVar("sm_decapitation_sound", "decapitation/scream.wav", "Decapitation sound");
-	cvarHits = CreateConVar("sm_decapitation_hits", "5", "headshots for decapitation");
-	cvarClearTime = CreateConVar("sm_decapitation_cleartime", "60.0");
+	cvarSound = CreateConVar("sm_decapitation_sound", "", "Decapitation sound");
+	cvarHits = CreateConVar("sm_decapitation_hits", "30", "headshots for decapitation");
+	cvarClearTime = CreateConVar("sm_decapitation_cleartime", "30.0");
 	
 	NeedHits = cvarHits.IntValue;
 	cvarHits.AddChangeHook(OnConVarChange);

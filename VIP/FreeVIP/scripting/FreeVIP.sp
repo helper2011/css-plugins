@@ -5,8 +5,12 @@
 
 public void VIP_OnClientLoaded(int iClient, bool bIsVIP)
 {
-	if(!IsFakeClient(iClient) && !bIsVIP)
+	if(!IsFakeClient(iClient))
 	{
-		VIP_GiveClientVIP(_, iClient, 0, "vip", false);
+		if(!bIsVIP)
+		{
+			VIP_GiveClientVIP(_, iClient, 0, "vip", false);
+		}
+		
 	}
 }

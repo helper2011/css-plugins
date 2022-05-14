@@ -1,0 +1,344 @@
+"Phrases"
+{
+	"Title"
+	{
+		"ru" "Список команд"
+		"en" "Commands list"
+
+	}
+	"ZClass"
+	{
+		"ru" "xyita"
+	}
+	"Useful commands menu title"
+	{
+		"ru"		"Полезные команды:"
+		"en"		"Useful commands:"
+	}
+	"Back"
+	{
+		"ru"		"Назад"
+		"en"		"Back"
+	}
+	"Exit"
+	{
+		"ru"		"Выход"
+		"en"		"Exit"
+	}
+	"Exec"
+	{
+		"ru"		"Выполнить команду"
+		"en"		"Run command"
+	}
+	"sm_boss"
+	{
+		"ru"		"!boss\nНаблюдение за боссом"
+		"en"		"!boss\nBoss Watching"
+	}
+	"sm_boss 0"
+	{
+		"ru"		"Позволяет Вам следить за боссом как за обычным игроком"
+		"en"		"Allows you to follow the boss like a normal player"
+	}
+	"sm_emode"
+	{
+		"ru"		"!emode\nАльтернативное использование материй"
+		"en"		"!emode\nAlternative use of Items"
+	}
+	"sm_emode 0"
+	{
+		"ru"		"Команда: use2\n \nДает возможность забиндить использование материи на другую кнопку."
+		"en"		"Command: use2\n \nGives the ability to bind the use of items to another button."
+	}
+	"sm_emode 1"
+	{
+		"ru"		"На кнопку \"Е\" материя не будет использоваться!\n \nНапример: bind f use2"
+		"en"		"No items will be used on the \"E\" button! \n \nFor example: bind f use2"
+	}
+	"fullupdate"
+	{
+		"ru"		"!fullupdate\nПолное обновление клиента"
+		"en"		"!fullupdate\nFull client update"
+	}
+	"fullupdate 0"
+	{
+		"ru"		"Полезна, если у вас не отображаются объекты карты\nили наблюдаются какие-то другие проблемы"
+		"en"		"Useful if you do not see map objects\nor have some other problems"
+	}
+	"sm_bhud"
+	{
+		"ru"		"!bhud\nОтображение урона по боссам"
+		"en"		"!bhud\nBoss damage display"
+	}
+	"sm_bhud 0"
+	{
+		"ru"		"Вкл/откл. отображение урону по боссам"
+		"en"		"On/off. displaying damage to bosses"
+	}
+	"sm_comms"
+	{
+		"ru"		"!comms\nИнформация о ваших мутах"
+		"en"		"!comms\nInfo about your mutes"
+	}
+	"sm_comms 0"
+	{
+		"ru"		"Дает информацию о ваших текущих мутах"
+		"en"		"Gives information about your current mutes"
+	}
+	"sm_comms 1"
+	{
+		"ru"		"1) Тип мута (Чат/Микрофон)\n2) Ник админа\n3) Длительность\n4) Причина"
+		"en"		"1) Mute type (Chat/Microphone)\n2) Admin nick\n3) Duration\n4) Reason"
+	}
+	"sm_glow"
+	{
+		"ru"		"!glow\nНастройка цвета вашего скина (VIP)"
+		"en"		"!glow\nCustomize your skin color (VIP)"
+	}
+	"sm_glow 0"
+	{
+		"ru"		"Позволяет Вам настроить цвет вашего скина"
+		"en"		"Allows you to customize the color of your skin"
+	}
+	"sm_hide"
+	{
+		"ru"		"!hide\nНастройка видимости тиммейтов (VIP)"
+		"en"		"!hide\nSetting the visibility of teammates (VIP)"
+	}
+	"sm_hide 0"
+	{
+		"ru"		"Позволяет вкл/откл. видимость Ваших тиммейтов\n \nПовысит Ваш FPS ~ +30%%!"
+		"en"		"Allows on/off. visibility of your teammates\n \nIncrease your FPS ~ + 30 %%!"
+	}
+	"sm_hidetrails"
+	{
+		"ru"		"!hidetrails\nНастройка видимости трейлов"
+		"en"		"!hidetrails\nSetting Trail Visibility"
+	}
+	"sm_hidetrails 0"
+	{
+		"ru"		"Позволяет вкл/откл. видимость трейлов."
+		"en"		"Allows on/off. visibility of trails."
+	}
+	"sm_hud"
+	{
+		"ru"		"!hud\nПоказ информации о материях"
+		"en"		"!hud\nDisplaying information about Items"
+	}
+	"sm_hud 0"
+	{
+		"ru"		"Позволяет вкл/откл. информацию о материях справа.\n \nКрайне не рекомендуем ее выключать!"
+		"en"		"Allows on/off. information about items on the right.\n \nIt is highly recommended not to turn it off!"
+	}
+	"sm_nominate"
+	{
+		"ru"		"!nominate\nДобавление карты в номинацию"
+		"en"		"!nominate\nAdding a map to a nomination"
+	}
+	"sm_nominate 0"
+	{
+		"ru"		"Дает возможность номинировать карту на голосование\nза следующую карту"
+		"en"		"Allows to nominate a map for voting\nfor the next map"
+	}
+	"sm_nomlist"
+	{
+		"ru"		"!nomlist\nСписок номинированных карт"
+		"en"		"!nomlist\nList of nominated maps"
+	}
+	"sm_nomlist 0"
+	{
+		"ru"		"Показывает вам список текущих номинированных карт"
+		"en"		"Shows you a list of currently nominated maps"
+	}
+	"sm_noshake"
+	{
+		"ru"		"!noshake\nНастройка тряски экрана"
+		"en"		"!noshake\nScreen shake setting"
+	}
+	"sm_noshake 0"
+	{
+		"ru"		"Позволяет вкл/откл тряску экрана"
+		"en"		"Allows on/off screen shaking"
+	}
+	"sm_nosteam"
+	{
+		"ru"		"!nosteam\nПосмотреть NoSteam игроков"
+		"en"		"!nosteam\nView NoSteam Players"
+	}
+	"sm_nosteam 0"
+	{
+		"ru"		"Показывает текущих NoSteam игроков"
+		"en"		"View current NoSteam Players"
+	}
+	"sm_rtv"
+	{
+		"ru"		"!rtv\nПроголосовать за смену карты"
+		"en"		"!rtv\nVote for map change"
+	}
+	"sm_rtv 0"
+	{	
+		"ru"		"Дает возможность проголосовать за смену карты"
+		"en"		"Gives the opportunity to vote for a change of map"
+	}
+	"sm_sm"
+	{
+		"ru"		"!sm\nЗамутить игрока"
+		"en"		"!sm\nMute player"
+	}
+	"sm_sm 0"
+	{
+		"ru"		"Позволяет замутить игрока (или группу)\n \nПримеры:"
+		"en"		"Allows to mute a player (or group)\n \nExamples:"
+	}
+	"sm_sm 1"
+	{
+		"ru"		"!sm @all - Замутить всех\n!sm @t - Замутить зомби\n!sm <nickname> - мут конкретного игрока"
+		"en"		"!sm @all - Mute all\n!sm @t - Mute zombies\n!sm <nickname> - Mute some player"
+	}
+	"sm_sm 2"
+	{
+		"ru"		"Обратная команда: !su"
+		"en"		"Opposite command: !su"
+	}
+
+	"sm_sound"
+	{
+		"ru"		"!sound\nНастройка звуков"
+		"en"		"!sound\nSetting sounds"
+	}
+	"sm_sound 0"
+	{
+		"ru"		"Позволяет отключить звуки выстрелов оружия и карты"
+		"en"		"Allows you to turn off the sounds of gunshots and maps"
+	}
+	"sm_spec"
+	{
+		"ru"		"!spec\nЗайди в спеки"
+		"en"		"!spec\nGo to specs"
+	}
+	"sm_spec 0"
+	{
+		"ru"		"Позволяет вам выйти в спеки а также наблюдать за кем-то\n \nПример: !spec <nick>"
+		"en"		"Allows you to go into specs and also watch someone\n \nExample: !spec <nick>"
+	}
+	"sm_status"
+	{
+		"ru"		"!status\nПроверка наличия рестрикта"
+		"en"		"!status\nRestriction check"
+	}
+	"sm_status 0"
+	{
+		"ru"		"Показывает, есть ли у вас рестрикт на материи,\nа также причину, длительность."
+		"en"		"Shows whether you have a restriction on Items,\nand also the reason, duration."
+	}
+	"sm_steam"
+	{
+		"ru"		"!steam\nПосмотреть Steam игроков"
+		"en"		"!steam\nView Steam Players"
+	}
+	"sm_steam 0"
+	{
+		"ru"		"Показывает текущих Steam игроков"
+		"en"		"View current Steam Players"
+	}
+	"sm_su"
+	{
+		"ru"		"!su\nРазмутить игрока"
+		"en"		"!su\nUnmute player"
+	}
+	"sm_su 0"
+	{
+		"ru"		"Позволяет размутить игрока (или группу)\n \nОбратная команда: !sm"
+		"en"		"Allows to unmute the player (or group)\n \nOpposite command: !sm"
+	}
+	"sm_tag"
+	{
+		"ru"		"!tag\nНастройка вашего чата (VIP)"
+		"en"		"!tag\nSetting up your chat (VIP)"
+	}
+	"sm_tag 0"
+	{
+		"ru"		"Позволяет полность настроить ваши сообщения\n \n1) Тег\n2) Цвет тега\n3) Цвет ника\n4) Цвет сообщения"
+		"en"		"Allows you to fully customize your messages\n \n1) Tag\n2) Tag color\n3) Name color\n4) Message color"
+	}
+	"sm_tp"
+	{
+		"ru"		"!tp\nВид от 1/3-го лица"
+		"en"		"!tp\n1/3rd person view"
+	}
+	"sm_tp 0"
+	{
+		"ru"		"Устанавливает вид от 1/3-го лица"
+		"en"		"Sets the view from 1/3rd person"
+	}
+	"sm_trails"
+	{
+		"ru"		"!trails\nВыбрать трейл (VIP)"
+		"en"		"!trails\nSelect trail (VIP)"
+	}
+	"sm_trails 0"
+	{
+		"ru"		"Дает возможность установить себе трейл."
+		"en"		"Allows you to set yourself a trail."
+	}
+	"sm_vip"
+	{
+		"ru"		"!vip\nVIP-Меню (VIP)"
+		"en"		"!vip\nVIP Menu (VIP)"
+	}
+	"sm_vip 0"
+	{
+		"ru"		"Открывает VIP-Меню"
+		"en"		"Opens the VIP Menu"
+	}
+	"zclass2"
+	{
+		"ru"		"!zclass\nНастройка классов"
+		"en"		"!zclass\nClass customization"
+	}
+	"zclass2 0"
+	{
+		"ru"		"Позволяет настроить класс за Зомби и за Людей"
+		"en"		"Allows you to customize the class for Zombies and Humans"
+	}
+	"zmarket"
+	{
+		"ru"		"!zmarket\nZMarket-меню"
+		"en"		"!zmarket\nZMarket menu"
+	}
+	"zmarket 0"
+	{
+		"ru"		"Открывает ZMarket-меню\n \nПозволяет выбрать начальную амуницию,\nкупить оружие, патроны"
+		"en"		"Opens the ZMarket menu\n \nAllows you to select the initial ammunition,\nbuy weapons, ammo"
+	}
+	"zmenu"
+	{
+		"ru"		"!zmenu\nZMenu-меню"
+		"en"		"!zmenu\nZMenu menu"
+	}
+	"zmenu 0"			
+	{
+		"ru"		"Открывает главное меню Zombie Escape"
+		"en"		"Opens the Zombie Escape main menu"
+	}
+	"zspawn"
+	{
+		"ru"		"!zspawn\nВоскрешение"
+		"en"		"!zspawn\nRespawn"
+	}
+	"zspawn 0"
+	{
+		"ru"		"Дает возможность воскреснуть"
+		"en"		"Gives the opportunity to respawn"
+	}
+	"ztele"
+	{
+		"ru"		"!ztele\nТелепорт на спавн"
+		"en"		"!ztele\nTeleport to spawn"
+	}
+	"ztele 0"
+	{
+		"ru"		"Телепортирует Вас на точку спавна"
+		"en"		"Teleports you to the spawn point"
+	}
+}

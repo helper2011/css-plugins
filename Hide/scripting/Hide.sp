@@ -137,7 +137,7 @@ public void OnPlayerTeam(Event hEvent, const char[] event, bool bDontBroadcast)
 {
 	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
 	Team[iClient] = hEvent.GetInt("team");
-	if(!IsPlayerAlive(iClient))
+	if(!iClient || !IsPlayerAlive(iClient))
 	{
 		return;
 	}

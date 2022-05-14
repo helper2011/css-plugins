@@ -1,30 +1,32 @@
 #include <sourcemod>
 #include <sdktools_stringtables>
+#include <sdktools_sound>
 #include <clientprefs>
 
 #undef REQUIRE_PLUGIN
 #include <BossHP>
 #define REQUIRE_PLUGIN
 
-
 #pragma newdecls required
-
-Handle g_hCookie;
-bool Overlay[MAXPLAYERS + 1];
-int Hitmarker[MAXPLAYERS + 1] = {7, ...};
 
 enum
 {
 	HITMARKER_SOUND = 1,
 	HITMARKER_ZOMBIE = 2,
-	HITMARKER_BOSS = 4
+	HITMARKER_BOSS = 4,
+
+	HITMARKER_ALL = HITMARKER_SOUND + HITMARKER_ZOMBIE + HITMARKER_BOSS
 }
+
+Handle hCookie;
+float OverlayTime[MAXPLAYERS + 1];
+int Hitmarker[MAXPLAYERS + 1] = {HITMARKER_ALL, ...};
 
 static const char g_sFiles[][] = 
 {
-	"sibgamers/hitmarker.vmt",
-	"sibgamers/hitmarker.vtf",
-	"sibgamers/other/hit.mp3"
+	"sexwbhop/hitmarker.vmt",
+	"sexwbhop/hitmarker.vtf",
+	"sexwbhop/hitmarker/hit.mp3"
 };
 
 public Plugin myinfo = 
@@ -37,16 +39,11 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	LoadTranslations("common.phrases");
-	LoadTranslations("hitmarker.phrases");
-	
 	HookEvent("player_hurt", OnPlayerHurt);
-	
 	SetCookieMenuItem(CookieMenuH, 0, "Hitmarker");
-	
-	RegConsoleCmd("sm_hm", Command_Hitmarker);
 	RegConsoleCmd("sm_hitmarker", Command_Hitmarker);
-	
+	hCookie = RegClientCookie("Hitmarker", "", CookieAccess_Private);
+
 	for(int i = 1; i <= MaxClients; i++)
 	{
 		if(IsClientInGame(i) && AreClientCookiesCached(i))
@@ -54,7 +51,6 @@ public void OnPluginStart()
 			OnClientCookiesCached(i);
 		}
 	}
-	g_hCookie = RegClientCookie("Hitmarker", "", CookieAccess_Private);
 }
 
 public void OnMapStart()
@@ -70,13 +66,30 @@ public void OnMapStart()
 	}
 }
 
+public void OnGameFrame()
+{
+	static float fTime;
+	fTime = GetGameTime();
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(!IsClientInGame(i))
+			continue;
+
+		if(OverlayTime[i] && fTime > OverlayTime[i])
+		{
+			DisplayClientOverlay(i);
+			OverlayTime[i] = 0.0;
+		}
+	}
+}
+
 public void CookieMenuH(int iClient, CookieMenuAction action, any info, char[] buffer, int maxlen)
 {
 	switch (action)
 	{
 		case CookieMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlen, "%T", "Item", iClient);
+			FormatEx(buffer, maxlen, "%s [%s]", GetClientLanguage(iClient) == 22 ? "Хитмаркер":"Hitmarker", Hitmarker[iClient] == HITMARKER_ALL ? "✔":Hitmarker[iClient] == 0 ? "×":"◼");
 		}
 		case CookieMenuAction_SelectOption:
 		{
@@ -87,13 +100,13 @@ public void CookieMenuH(int iClient, CookieMenuAction action, any info, char[] b
 
 void HitmarkerMenu(int iClient)
 {
+	bool bRussian = (GetClientLanguage(iClient) == 22);
 	char szBuffer[256];
-	Menu hMenu = new Menu(HitmarkerMenuH);
-	SetGlobalTransTarget(iClient);
-	hMenu.SetTitle("%t", "Title");
-	FormatEx(szBuffer, 256, "%t: %t", "Sound", (Hitmarker[iClient] & HITMARKER_SOUND) ? "On":"Off"); hMenu.AddItem("", szBuffer);
-	FormatEx(szBuffer, 256, "%t: %t", "Zombie", (Hitmarker[iClient] & HITMARKER_ZOMBIE) ? "On":"Off"); hMenu.AddItem("", szBuffer);
-	FormatEx(szBuffer, 256, "%t: %t", "Boss", (Hitmarker[iClient] & HITMARKER_BOSS) ? "On":"Off"); hMenu.AddItem("", szBuffer);
+	Menu hMenu = new Menu(HitmarkerMenuH, MenuAction_End | MenuAction_Cancel | MenuAction_Select);
+	hMenu.SetTitle(bRussian ? "Хитмаркер":"Hitmarker");
+	FormatEx(szBuffer, 256, "%s: [%s]", bRussian ? "Звук":"Sound", (Hitmarker[iClient] & HITMARKER_SOUND) ? "✔":"×"); hMenu.AddItem("", szBuffer);
+	FormatEx(szBuffer, 256, "%s: [%s]", bRussian ? "Зомби":"Zombie", (Hitmarker[iClient] & HITMARKER_ZOMBIE) ? "✔":"×"); hMenu.AddItem("", szBuffer);
+	FormatEx(szBuffer, 256, "%s: [%s]", bRussian ? "Босс":"Boss", (Hitmarker[iClient] & HITMARKER_BOSS) ? "✔":"×"); hMenu.AddItem("", szBuffer);
 	hMenu.ExitBackButton = true;
 	hMenu.Display(iClient, 0);
 }
@@ -115,18 +128,22 @@ public int HitmarkerMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
 		}
 		case MenuAction_Select:
 		{
-			char szBuffer[16];
 			Hitmarker[iClient] ^= (1 << iItem);
-			IntToString(Hitmarker[iClient], szBuffer, 16);
-			SetClientCookie(iClient, g_hCookie, szBuffer);
 			HitmarkerMenu(iClient);
+
+			if(AreClientCookiesCached(iClient))
+			{
+				char szBuffer[16];
+				IntToString(Hitmarker[iClient], szBuffer, 16);
+				SetClientCookie(iClient, hCookie, szBuffer);
+			}
 		}
 	}
 }
 
 public Action Command_Hitmarker(int iClient, int iArgs)
 {
-	if(iClient && !IsFakeClient(iClient) && AreClientCookiesCached(iClient))
+	if(iClient && !IsFakeClient(iClient))
 	{
 		HitmarkerMenu(iClient);
 	}
@@ -136,61 +153,61 @@ public Action Command_Hitmarker(int iClient, int iArgs)
 
 public void OnBossDamaged(CBoss Boss, CConfig Config, int client, float damage)
 {
-	Hitmark(client, false);
+	Hitmark(client, HITMARKER_BOSS);
 }
-
 
 public void OnPlayerHurt(Event hEvent, const char[] event, bool bDontBroadcast)
 {
-	int iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
+	static int iAttacker;
+	iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
 	
 	if(iAttacker != GetClientOfUserId(hEvent.GetInt("userid")))
 	{
-		Hitmark(iAttacker, true);
+		Hitmark(iAttacker, HITMARKER_ZOMBIE);
 	}
 }
 
-void Hitmark(int iClient, bool bZombie)
+void Hitmark(int iClient, int iEntityFlag)
 {
-	if(0 < iClient <= MaxClients && ((bZombie && Hitmarker[iClient] & HITMARKER_ZOMBIE) || (!bZombie && Hitmarker[iClient] & HITMARKER_BOSS)))
+	if(0 < iClient <= MaxClients && Hitmarker[iClient] & iEntityFlag)
 	{
-		if(!Overlay[iClient])
+		if(!OverlayTime[iClient])
 		{
-			ClientCommand(iClient, "r_screenoverlay %s", g_sFiles[0]);
-			Overlay[iClient] = view_as<bool>(CreateTimer(0.2, Timer_RemoveHitMarker, iClient));
+			OverlayTime[iClient] = GetGameTime() + 0.2;
+			DisplayClientOverlay(iClient, g_sFiles[0]);
 		}
 		
 		if(Hitmarker[iClient] & HITMARKER_SOUND)
 		{
-			ClientCommand(iClient, "playgamesound %s", g_sFiles[2]);
+			EmitSoundToClient(iClient, g_sFiles[2], SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS);
 		}
 	}
 }
 
-public Action Timer_RemoveHitMarker(Handle hTimer, int iClient)
-{
-	Overlay[iClient] = false;
-	if(IsClientInGame(iClient)) 
-		ClientCommand(iClient, "r_screenoverlay off");
-}
-
 public void OnClientCookiesCached(int iClient)
 {
-	if(!IsFakeClient(iClient))
+	if(IsFakeClient(iClient))
 	{
-		char szBuffer[16];
-		GetClientCookie(iClient, g_hCookie, szBuffer, 16);
-		
-		if(szBuffer[0])
-		{
-			Hitmarker[iClient] = StringToInt(szBuffer);
-		}
+		Hitmarker[iClient] = 0;
+		return;
+	}
+
+	char szBuffer[8];
+	GetClientCookie(iClient, hCookie, szBuffer, 8);
+	
+	if(szBuffer[0])
+	{
+		Hitmarker[iClient] = StringToInt(szBuffer);
 	}
 }
 
 public void OnClientDisconnect(int iClient)
 {
-	Hitmarker[iClient] = false;
-	Overlay[iClient] = false;
-	Hitmarker[iClient] = 7;
+	OverlayTime[iClient] = 0.0;
+	Hitmarker[iClient] = HITMARKER_ALL;
+}
+
+stock void DisplayClientOverlay(int iClient, const char[] overlay = "")
+{
+	ClientCommand(iClient, "r_screenoverlay \"%s\"", overlay);
 }
