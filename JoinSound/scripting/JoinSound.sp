@@ -30,11 +30,11 @@ public void OnPluginStart()
 	CooldownMap = new StringMap();
 	LoadTranslations("common.phrases");
 	LoadTranslations("joinsound.phrases");
-	cvarPath = CreateConVar("joinsnd_path", "sound/sexwbhop/joinsnd/");
+	cvarPath = CreateConVar("joinsnd_path", "sound/sexwbhop/rpg/joinsnd/");
 	cvarPlayType = CreateConVar("joinsnd_playtype", "0", "0 - Random for every client, 1 - Random sound on map session");
 	cvarPlayType.AddChangeHook(OnConVarChange);
 	PlayType = cvarPlayType.IntValue;
-	cvarCooldown = CreateConVar("joinsnd_cooldown", "7200", "Play sound cooldown for client");
+	cvarCooldown = CreateConVar("joinsnd_cooldown", "0", "Play sound cooldown for client");
 	cvarCooldown.AddChangeHook(OnConVarChange);
 	Cooldown = cvarCooldown.IntValue;
 	HookEvent("player_team", OnPlayerTeam);

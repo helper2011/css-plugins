@@ -1,3 +1,5 @@
+#define SM_BOTOX 1
+
 #include <sourcemod>
 #include <vip_core>
 #include <sdktools>
@@ -193,15 +195,32 @@ int GetModelIndex(const char[] name)
 
 	return -1;
 }
+
+#if SM_BOTOX 1
+public void OnEntitySpawned(int entity, const char[] classname)
+{
+	if(strlen(classname) > 10 && classname[0] == 'h' && !strncmp(classname[10], "proj", 4, true))
+	{
+		int iClient = GetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity");
+		if(0 < iClient <= MaxClients && IsValidClientItem(iClient))
+		{
+			char szBuffer[256];
+			ModelsMenu.GetItem(Item[iClient], szBuffer, 256);
+			SetEntityModel(entity, szBuffer);
+		}	
+		
+	}
+}
+#else
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if(IsValidEntity(entity) && classname[0] == 'h' && !strncmp(classname[10], "proj", 4, true))
+	if(IsValidEntity(entity) && strlen(classname) > 10 && classname[0] == 'h' && !strncmp(classname[10], "proj", 4, true))
 	{
-		CreateTimer(0.0, Timer_OnSpawnProjectile, EntIndexToEntRef(entity), TIMER_FLAG_NO_MAPCHANGE);
+		RequestFrame(OnEntityCreatedNextTick, EntIndexToEntRef(entity));
 	}
 }
 
-public Action Timer_OnSpawnProjectile(Handle hTimer, int entity)
+stock void OnEntityCreatedNextTick(int entity)
 {
 	if ((entity = EntRefToEntIndex(entity)) != INVALID_ENT_REFERENCE && entity && IsValidEntity(entity))
 	{
@@ -214,6 +233,9 @@ public Action Timer_OnSpawnProjectile(Handle hTimer, int entity)
 		}	
 	}
 }
+
+#endif
+
 
 bool IsValidClientItem(int iClient)
 {

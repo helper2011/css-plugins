@@ -3,14 +3,46 @@
 
 #pragma newdecls required
 
+bool Loaded[MAXPLAYERS + 1];
+ConVar cvarToggle, cvarVIPGroup, cvarBlockPostAdminCheck;
+
+public void OnPluginStart()
+{
+	cvarToggle = CreateConVar("vip_free_toggle", "1");
+	cvarVIPGroup = CreateConVar("vip_free_group", "vip_free");
+	cvarBlockPostAdminCheck = CreateConVar("vip_free_block_post_admin_check", "0");
+	AutoExecConfig(true, "plugin.FreeVIP", "vip");
+}
+
+public Action OnClientPreAdminCheck(int iClient)
+{
+	return (cvarToggle.BoolValue && cvarBlockPostAdminCheck.BoolValue && !Loaded[iClient]) ? Plugin_Handled:Plugin_Continue;
+}
+
 public void VIP_OnClientLoaded(int iClient, bool bIsVIP)
 {
-	if(!IsFakeClient(iClient))
+	if(cvarToggle.BoolValue && !IsFakeClient(iClient))
 	{
 		if(!bIsVIP)
 		{
-			VIP_GiveClientVIP(_, iClient, 0, "vip", false);
+			Loaded[iClient] = true;
+
+			char szBuffer[32];
+			cvarVIPGroup.GetString(szBuffer, 32);
+			VIP_GiveClientVIP(_, iClient, 0, szBuffer, false);
+
+			if(cvarBlockPostAdminCheck.BoolValue)
+			{
+				RequestFrame(NotifyPostAdminCheck_Next, iClient);
+			}
 		}
-		
+	}
+}
+
+void NotifyPostAdminCheck_Next(int iClient)
+{
+	if(IsClientInGame(iClient))
+	{
+		NotifyPostAdminCheck(iClient);
 	}
 }

@@ -19,7 +19,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	(cvars[0] = CreateConVar("event_vip", "0")).AddChangeHook(OnConVarChange);						Enable = cvars[0].BoolValue;
-	(cvars[1] = CreateConVar("event_vip_group", "Event_Winner")).AddChangeHook(OnConVarChange2);	cvars[1].GetString(Group, 64);
+	(cvars[1] = CreateConVar("event_vip_group", "vip_event")).AddChangeHook(OnConVarChange2);	cvars[1].GetString(Group, 64);
 	(cvars[2] = CreateConVar("event_vip_minroundtime", "150")).AddChangeHook(OnConVarChange3);		MinRoundTime = cvars[2].IntValue;
 	
 	HookEvent("round_end", OnRoundEnd);

@@ -5,7 +5,6 @@
 #pragma newdecls required
 
 Handle g_hCookie;
-bool Input[MAXPLAYERS + 1];
 
 public Plugin myinfo = 
 {
@@ -25,32 +24,55 @@ public Action Command_JoinMsg(int iClient, int iArgs)
 {
 	if(iClient && !IsFakeClient(iClient) && VIP_IsClientVIP(iClient))
 	{
-		Input[iClient] = true;
-		
-		PrintHintText(iClient, "[VIP] Connect Message\n%s", GetClientLanguage(iClient) == 22 ? "Теперь напиши в чат желаемое сообщение при входе (cancel = отмена)":"Type the desired message in chat (cancel to interrupt)");
+		char szBuffer[256];
+		if(iArgs < 1)
+		{
+			ReplyToCommand(iClient, "%s: !joinmsg <%s> [clear - %s]", GetClientLanguage(iClient) == 22 ? "Использование":"Usage", GetClientLanguage(iClient) == 22 ? "сообщение":"message", GetClientLanguage(iClient) == 22 ? "сброс":"reset");
+			GetClientCookie(iClient, g_hCookie, szBuffer, 256);
+			if(szBuffer[0])
+			{
+				ReplyToCommand(iClient, "%s: %s", GetClientLanguage(iClient) == 22 ? "Твое текущее сообщение":"Your current message", szBuffer);
+			}
+		}
+		else
+		{
+			GetCmdArgString(szBuffer, 256);
+			if(strcmp(szBuffer, "clear", false) == 0)
+			{
+				SetClientCookie(iClient, g_hCookie, "");
+				ReplyToCommand(iClient, "%s", GetClientLanguage(iClient) == 22 ? "Сообщение сброшено!":"Message cleared!");
+
+			}
+			else
+			{
+				SetClientCookie(iClient, g_hCookie, szBuffer);
+				ReplyToCommand(iClient, "%s: %s", GetClientLanguage(iClient) == 22 ? "Твое новое сообщение":"Your new message", szBuffer);
+			}
+		}
 	}
 	
 	return Plugin_Handled;
 }
 
-public Action OnClientSayCommand(int iClient, const char[] command, const char[] sArgs)
+public void OnClientCookiesCached(int iClient)
 {
-	if(Input[iClient])
+	if(IsFakeClient(iClient) || !VIP_IsClientVIP(iClient))
 	{
-		if(strcmp(sArgs, "cancel", false))
-		{
-			SetClientCookie(iClient, g_hCookie, sArgs);
-			PrintHintText(iClient, "[VIP] Connect Message\n%s", GetClientLanguage(iClient) == 22 ? "Вы успешно установили сообщение!":"You have successfully changed the message when connecting");
-		}
-		
-		Input[iClient] = false;
-		
-		return Plugin_Handled;
+		return;
 	}
-	return Plugin_Continue;
+	PrintClientMessage(iClient);
 }
 
 public void VIP_OnVIPClientLoaded(int iClient)
+{
+	if(!AreClientCookiesCached(iClient))
+	{
+		return;
+	}
+	PrintClientMessage(iClient);
+}
+
+void PrintClientMessage(int iClient)
 {
 	char szBuffer[256];
 	GetClientCookie(iClient, g_hCookie, szBuffer, 256);
@@ -62,10 +84,5 @@ public void VIP_OnVIPClientLoaded(int iClient)
 			PrintCenterText(i, "[VIP] %N %s %s", iClient, GetClientLanguage(i) == 22 ? "Подключился":"Connected", szBuffer);
 		}
 	}
-}
 
-public void OnClientDisconnect(int iClient)
-{
-	Input[iClient] = false;
 }
-
