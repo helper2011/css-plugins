@@ -1,5 +1,6 @@
 #include <sourcemod>
 #include <vip_core>
+#include <sourcebanspp>
 
 #pragma newdecls required
 
@@ -19,7 +20,12 @@ public Action OnClientPreAdminCheck(int iClient)
 	return (cvarToggle.BoolValue && cvarBlockPostAdminCheck.BoolValue && !Loaded[iClient]) ? Plugin_Handled:Plugin_Continue;
 }
 
-public void VIP_OnClientLoaded(int iClient, bool bIsVIP)
+public Action SBPP_OnCheckLoadAdmin(int iClient)
+{
+	return (cvarToggle.BoolValue && cvarBlockPostAdminCheck.BoolValue && !Loaded[iClient]) ? Plugin_Handled:Plugin_Continue;
+}
+
+public void VIP_OnClientLoaded_Pre(int iClient, bool bIsVIP)
 {
 	if(cvarToggle.BoolValue && !IsFakeClient(iClient))
 	{
@@ -31,18 +37,18 @@ public void VIP_OnClientLoaded(int iClient, bool bIsVIP)
 			cvarVIPGroup.GetString(szBuffer, 32);
 			VIP_GiveClientVIP(_, iClient, 0, szBuffer, false);
 
-			if(cvarBlockPostAdminCheck.BoolValue)
+			/*if(cvarBlockPostAdminCheck.BoolValue)
 			{
 				RequestFrame(NotifyPostAdminCheck_Next, iClient);
-			}
+			}*/
 		}
 	}
 }
 
-void NotifyPostAdminCheck_Next(int iClient)
+/*void NotifyPostAdminCheck_Next(int iClient)
 {
 	if(IsClientInGame(iClient))
 	{
 		NotifyPostAdminCheck(iClient);
 	}
-}
+}*/

@@ -27,6 +27,7 @@ public Plugin myinfo =
 public void OnPluginStart() 
 {
 	LoadTranslations("common.phrases");
+	LoadTranslations("vip_modules.phrases");
 
 	g_hCookie = RegClientCookie("VIP_HeModel", "", CookieAccess_Private);
 

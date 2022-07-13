@@ -1,3 +1,5 @@
+#define ZOMBIE
+
 #include <sourcemod>
 #include <vip_core>
 
@@ -16,6 +18,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	LoadTranslations("vip_modules.phrases");
 	m_iHealth = FindSendPropInfo("CCSPlayer", "m_iHealth");
 	
 	if(VIP_IsVIPLoaded())
@@ -49,7 +52,7 @@ public bool OnItemDisplay(int iClient, const char[] feature, char[] display, int
 {
 	if (VIP_IsClientFeatureUse(iClient, feature))
 	{
-		FormatEx(display, maxlength, "%T: [%i]", feature, VIP_GetClientFeatureInt(iClient, Feature));
+		FormatEx(display, maxlength, "%T: [%i HP]", feature, iClient, Health[iClient]);
 		return true;
 	}
 
@@ -71,8 +74,15 @@ public void OnClientDisconnect(int iClient)
 
 public void VIP_OnPlayerSpawn(int iClient, int iTeam, bool bIsVip)
 {
-	if(bIsVip && VIP_IsClientFeatureUse(iClient, Feature) && Health[iClient])
+	if(bIsVip && Health[iClient])
 	{
+		#if defined ZOMBIE
+		if(GetClientTeam(iClient) == 3)
+		{
+			SetEntData(iClient, m_iHealth, Health[iClient]);
+		}
+		#else
 		SetEntData(iClient, m_iHealth, Health[iClient]);
+		#endif
 	}
 }

@@ -13,9 +13,17 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	BuildLogFilePath();
-	
 	HookEvent("player_disconnect", OnPlayerDisconnect, EventHookMode_Pre);
+}
+
+public void OnMapStart()
+{
+	BuildLogFilePath();
+}
+
+public void OnMapEnd()
+{
+	delete LogFile;
 }
 
 void BuildLogFilePath()
@@ -23,7 +31,7 @@ void BuildLogFilePath()
 	char szBuffer[256];
 	FormatTime(szBuffer, 367, "logs/connects_%Y-%m-%d.log");
 	BuildPath(Path_SM, szBuffer, 256, szBuffer);
-	if((LogFile = OpenFile(szBuffer, "w+")) == null)
+	if((LogFile = OpenFile(szBuffer, "a+")) == null)
 	{
 		SetFailState("Cant create/open \"%s\"", szBuffer);
 	}

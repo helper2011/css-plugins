@@ -1,3 +1,5 @@
+#define ZOMBIE
+
 #include <sourcemod>
 #include <vip_core>
 
@@ -11,7 +13,7 @@ int m_iHealth,
 	Health[MAXPLAYERS + 1] = {100, ...};
 
 #define REGEN_COUNT 1
-#define REGEN_DELAY 1.0
+#define REGEN_DELAY 3.0
 
 public Plugin myinfo =
 {
@@ -22,12 +24,13 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	LoadTranslations("vip_modules.phrases");
 	m_iHealth = FindSendPropInfo("CCSPlayer", "m_iHealth");
 	
 	HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
 	HookEvent("player_hurt", OnPlayerHurt);
 	
-	ToggleTimer(true);
+	ToggleTimer();
 	Timer_GetClientHealths(null);
 	
 	if(VIP_IsVIPLoaded())
@@ -38,9 +41,8 @@ public void OnPluginStart()
 
 public void VIP_OnVIPLoaded()
 {
-	VIP_RegisterFeature(g_sFeature, BOOL);
+	VIP_RegisterFeature(g_sFeature, BOOL, _, _, OnItemDisplay);
 }
-
 
 public void OnPluginEnd()
 {
@@ -52,7 +54,17 @@ public void OnPluginEnd()
 
 public void OnMapEnd()
 {
-	ToggleTimer(false);
+	Timer = null;
+}
+
+public bool OnItemDisplay (int iClient, const char[] szFeature, char[] szDisplay, int iMaxLength)
+{
+	if(VIP_IsClientFeatureUse(iClient, g_sFeature))
+	{
+		FormatEx(szDisplay, iMaxLength, "%T [%i HP/%.0f%c]", g_sFeature, iClient, REGEN_COUNT, REGEN_DELAY, GetClientLanguage(iClient) == 22 ? 'c':'s');
+		return true;
+	}
+	return false;
 }
 
 public void OnRoundStart(Event hEvent, const char[] szName, bool bDontBroadcast)
@@ -73,21 +85,39 @@ public Action Timer_GetClientHealths(Handle hTimer)
 
 public void OnPlayerHurt(Event hEvent, const char[] szName, bool bDontBroadcast)
 {
-	ToggleTimer(true);
+	ToggleTimer();
 }
 
-void ToggleTimer(bool bToggle)
+void ToggleTimer()
 {
-	if(!bToggle)
-	{
-		delete Timer;
-	}
-	else if(!Timer)
+	if(!Timer)
 	{
 		Timer = CreateTimer(REGEN_DELAY, Timer_Regen, _, TIMER_REPEAT);
 	}
 }
+#if defined ZOMBIE
+public Action Timer_Regen(Handle hTimer)
+{
+	int iCount, iHealth;
+	
+	for(int i = 1; i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i) && GetClientTeam(i) == 3 && VIP_IsClientVIP(i) && VIP_IsClientFeatureUse(i, g_sFeature) && (iHealth = GetEntData(i, m_iHealth)) < Health[i])
+		{
+			SetEntData(i, m_iHealth, (iHealth += REGEN_COUNT) >= Health[i] ? Health[i]:iHealth);
+			iCount++;
+		}
+	}
+	
+	if(iCount == 0)
+	{
+		Timer = null;
+		return Plugin_Stop;
+	}
 
+	return Plugin_Continue;
+}
+#else
 public Action Timer_Regen(Handle hTimer)
 {
 	int iCount, iHealth;
@@ -103,6 +133,10 @@ public Action Timer_Regen(Handle hTimer)
 	
 	if(iCount == 0)
 	{
-		ToggleTimer(false);
+		Timer = null;
+		return Plugin_Stop;
 	}
+
+	return Plugin_Continue;
 }
+#endif

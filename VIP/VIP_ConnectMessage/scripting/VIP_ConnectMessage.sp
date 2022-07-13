@@ -56,7 +56,7 @@ public Action Command_JoinMsg(int iClient, int iArgs)
 
 public void OnClientCookiesCached(int iClient)
 {
-	if(IsFakeClient(iClient) || !VIP_IsClientVIP(iClient))
+	if(!IsClientInGame(iClient) || IsFakeClient(iClient) || !VIP_IsClientVIP(iClient))
 	{
 		return;
 	}

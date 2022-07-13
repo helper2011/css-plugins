@@ -23,7 +23,7 @@ bool		socketError[MAX_SERVERS];
 	
 ConVar		DelayAdvert;
 
-#if DEBUG_MODE 0
+#if DEBUG_MODE 1
 char DebugLogFile[PLATFORM_MAX_PATH];
 
 void DebugMsg(const char[] sMsg, any ...)
@@ -235,7 +235,7 @@ public Action CleanUp(Handle timer)
 	{
 		if (!Info[i][0] && !socketError[i] ) 
 		{
-			LogError("Server %s:%i is down: no timely reply received", ServerAddress[i], Port[i]);
+			//LogError("Server %s:%i is down: no timely reply received", ServerAddress[i], Port[i]);
 			CloseHandle(socket[i]);
 		}
 	}
@@ -357,7 +357,7 @@ public void OnSocketDisconnected(Handle sock, int iServerId)
 
 public void OnSocketError(Handle sock, const int errorType, const int errorNum, int iServerId)
 {
-	LogError("Server %s:%i is down: socket error %i (errno %i)", ServerAddress[iServerId], Port[iServerId], errorType, errorNum);
+	//LogError("Server %s:%i is down: socket error %i (errno %i)", ServerAddress[iServerId], Port[iServerId], errorType, errorNum);
 	socketError[iServerId] = true;
 	delete socket[iServerId];
 }
