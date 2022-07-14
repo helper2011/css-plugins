@@ -9,7 +9,7 @@
 
 #pragma newdecls required
 
-int iTracerTableID = -1, icvRandom, icvSilencer, icvPercent;
+int iTracerTableID = -1, icvRandom, icvSilencer, icvPercent, RussianLanguageId;
 Handle hCookieDisabled;
 bool bDisabled[MAXPLAYERS + 1] = {false, ...};
 
@@ -24,6 +24,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	ConVar cvar;
 	cvar = CreateConVar("bullet_tracer_random", "0", "0 = Tracer appears for every shoot. \
 														1 = Enable random appearance. \
@@ -68,7 +72,7 @@ public void BulletTracersMenuHandler(int iClient, CookieMenuAction action, any i
 	{
 		case CookieMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlen, "%s: [%s]", GetClientLanguage(iClient) == 22 ? "Скрытие трейсеров":"Hide bullets", bDisabled[iClient] ? "✔":"×");
+			FormatEx(buffer, maxlen, "%s: [%s]", GetClientLanguage(iClient) == RussianLanguageId ? "Скрытие трейсеров":"Hide bullets", bDisabled[iClient] ? "✔":"×");
 		}
 		case CookieMenuAction_SelectOption:
 		{
@@ -128,7 +132,7 @@ public Action cmdTracers(int client, int args)
 void ToggleClientTracers(int iClient)
 {
 	bDisabled[iClient] = !bDisabled[iClient];
-	PrintHintText(iClient, "%s: [%s]", GetClientLanguage(iClient) == 22 ? "Скрытие трейсеров":"Hide bullets", bDisabled[iClient] ? "✔":"×");
+	PrintHintText(iClient, "%s: [%s]", GetClientLanguage(iClient) == RussianLanguageId ? "Скрытие трейсеров":"Hide bullets", bDisabled[iClient] ? "✔":"×");
 
 	if(AreClientCookiesCached(iClient))
 	{

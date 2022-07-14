@@ -3,7 +3,7 @@
 #include <sdktools_functions>
 #pragma newdecls required
 
-int m_bConnected, PlayerManager;
+int m_bConnected, PlayerManager, RussianLanguageId;
 bool Hook, Invisible[MAXPLAYERS + 1];
 
 char InsisName[40];
@@ -22,6 +22,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	cvarInsisName = CreateConVar("admin_hide_name", "2I42q4iqJIORQr3q");
 	cvarInsisName.GetString(InsisName, 40);
 	cvarInsisName.AddChangeHook(OnConVarChange);
@@ -228,7 +232,7 @@ void CreateEvent2(int iClient)
 {
 	for(int i = 1; i <= MaxClients; i++)
 	{
-		if(IsClientInGame(i) && GetClientLanguage(i) == 22)
+		if(IsClientInGame(i) && GetClientLanguage(i) == RussianLanguageId)
 		{
 			PrintToChat(i, Messages[Invisible[iClient] ? 1:0], iClient);
 		}

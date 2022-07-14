@@ -9,7 +9,7 @@ const int MAX_SOUNDS = 50;
 
 Handle CookieRsm;
 
-int Sounds, Next;
+int Sounds, Next, RussianLanguageId;
 char Sound[MAX_SOUNDS][256];
 
 bool Toggle[MAXPLAYERS + 1], ReloadSongs, Mix;
@@ -26,6 +26,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	Path = CreateConVar("rsm_path", "sexwbhop/rsm/");
 	CookieRsm = RegClientCookie("Rsm", "", CookieAccess_Private);
 	RegConsoleCmd("sm_rsm", Command_Rsm);
@@ -72,7 +76,7 @@ public void RSMMenuHandler(int iClient, CookieMenuAction action, any info, char[
 	{
 		case CookieMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlen, "%s: [%s]", (GetClientLanguage(iClient) == 22) ? "Музыка в начале раунда":"Round start music", Toggle[iClient] ? "✔":"×");
+			FormatEx(buffer, maxlen, "%s: [%s]", (GetClientLanguage(iClient) == RussianLanguageId) ? "Музыка в начале раунда":"Round start music", Toggle[iClient] ? "✔":"×");
 		}
 		case CookieMenuAction_SelectOption:
 		{
@@ -204,7 +208,7 @@ public Action Command_Rsm(int iClient, int iArgs)
 	{
 		Toggle[iClient] = !Toggle[iClient];
 		SetClientCookie(iClient, CookieRsm, Toggle[iClient] ? "":"0");
-		PrintHintText(iClient, "%s: [%s]", (GetClientLanguage(iClient) == 22) ? "Музыка в начале раунда":"Round start music", Toggle[iClient] ? "✔":"×");
+		PrintHintText(iClient, "%s: [%s]", (GetClientLanguage(iClient) == RussianLanguageId) ? "Музыка в начале раунда":"Round start music", Toggle[iClient] ? "✔":"×");
 	}
 	
 	return Plugin_Handled;

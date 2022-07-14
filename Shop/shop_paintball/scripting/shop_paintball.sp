@@ -14,7 +14,8 @@ ItemId
 	
 int
 	DecalIndex[MAX_DECALS],
-	Decals = -1;
+	Decals = -1,
+	RussianLanguageId;
 
 bool 
 	Enable[MAXPLAYERS + 1];
@@ -38,6 +39,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	LoadDecals();
 	
 	Price = CreateConVar("sm_shop_paintball_price", "500", "Price for the paintball.");
@@ -101,7 +106,7 @@ public void OnItemRegistered(CategoryId category_id, const char[] category, cons
 
 public bool OnDisplay(int client, CategoryId category_id, const char[] category, ItemId item_id, const char[] item, ShopMenu menu, bool &disabled, const char[] name, char[] buffer, int maxlen)
 {
-	strcopy(buffer, maxlen, (GetClientLanguage(client) == 22 ? "Пэйнтбол":"Paintball"));
+	strcopy(buffer, maxlen, (GetClientLanguage(client) == RussianLanguageId ? "Пэйнтбол":"Paintball"));
 	return true;
 }
 

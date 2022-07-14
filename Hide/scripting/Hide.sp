@@ -11,7 +11,8 @@
 Handle
 	g_hCookie;
 int
-	Team[MAXPLAYERS + 1];
+	Team[MAXPLAYERS + 1],
+	RussianLanguageId;
 bool
 	Toggle[MAXPLAYERS + 1],
 	IsLeader[MAXPLAYERS + 1],
@@ -33,6 +34,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	g_hCookie = RegClientCookie("Hide", "", CookieAccess_Private);
 	HookEvent("player_team", OnPlayerTeam);
 	HookEvent("player_death", OnPlayerDeath);
@@ -63,7 +68,7 @@ public void HideMenuHandler(int iClient, CookieMenuAction action, any info, char
 	{
 		case CookieMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlen, "%s: [%s]", Phrases[GetClientLanguage(iClient) == 22 ? 0:1], Toggle[iClient] ? "✔":"×");
+			FormatEx(buffer, maxlen, "%s: [%s]", Phrases[GetClientLanguage(iClient) == RussianLanguageId ? 0:1], Toggle[iClient] ? "✔":"×");
 		}
 		case CookieMenuAction_SelectOption:
 		{
@@ -236,7 +241,7 @@ public void OnPlayerDeath(Event hEvent, const char[] event, bool bDontBroadcast)
 
 void ToggleHide(int iClient)
 {
-	int iLanguage = (GetClientLanguage(iClient) == 22) ? 0:1;
+	int iLanguage = (GetClientLanguage(iClient) == RussianLanguageId) ? 0:1;
 	if(Toggle[iClient])
 	{
 		OnClientDisconnect(iClient);

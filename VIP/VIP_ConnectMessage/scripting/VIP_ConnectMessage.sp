@@ -5,6 +5,7 @@
 #pragma newdecls required
 
 Handle g_hCookie;
+int RussianLanguageId;
 
 public Plugin myinfo = 
 {
@@ -27,11 +28,11 @@ public Action Command_JoinMsg(int iClient, int iArgs)
 		char szBuffer[256];
 		if(iArgs < 1)
 		{
-			ReplyToCommand(iClient, "%s: !joinmsg <%s> [clear - %s]", GetClientLanguage(iClient) == 22 ? "Использование":"Usage", GetClientLanguage(iClient) == 22 ? "сообщение":"message", GetClientLanguage(iClient) == 22 ? "сброс":"reset");
+			ReplyToCommand(iClient, "%s: !joinmsg <%s> [clear - %s]", GetClientLanguage(iClient) == RussianLanguageId ? "Использование":"Usage", GetClientLanguage(iClient) == RussianLanguageId ? "сообщение":"message", GetClientLanguage(iClient) == RussianLanguageId ? "сброс":"reset");
 			GetClientCookie(iClient, g_hCookie, szBuffer, 256);
 			if(szBuffer[0])
 			{
-				ReplyToCommand(iClient, "%s: %s", GetClientLanguage(iClient) == 22 ? "Твое текущее сообщение":"Your current message", szBuffer);
+				ReplyToCommand(iClient, "%s: %s", GetClientLanguage(iClient) == RussianLanguageId ? "Твое текущее сообщение":"Your current message", szBuffer);
 			}
 		}
 		else
@@ -40,13 +41,13 @@ public Action Command_JoinMsg(int iClient, int iArgs)
 			if(strcmp(szBuffer, "clear", false) == 0)
 			{
 				SetClientCookie(iClient, g_hCookie, "");
-				ReplyToCommand(iClient, "%s", GetClientLanguage(iClient) == 22 ? "Сообщение сброшено!":"Message cleared!");
+				ReplyToCommand(iClient, "%s", GetClientLanguage(iClient) == RussianLanguageId ? "Сообщение сброшено!":"Message cleared!");
 
 			}
 			else
 			{
 				SetClientCookie(iClient, g_hCookie, szBuffer);
-				ReplyToCommand(iClient, "%s: %s", GetClientLanguage(iClient) == 22 ? "Твое новое сообщение":"Your new message", szBuffer);
+				ReplyToCommand(iClient, "%s: %s", GetClientLanguage(iClient) == RussianLanguageId ? "Твое новое сообщение":"Your new message", szBuffer);
 			}
 		}
 	}
@@ -81,7 +82,7 @@ void PrintClientMessage(int iClient)
 	{
 		if(IsClientInGame(i) && !IsFakeClient(i))
 		{
-			PrintCenterText(i, "[VIP] %N %s %s", iClient, GetClientLanguage(i) == 22 ? "Подключился":"Connected", szBuffer);
+			PrintCenterText(i, "[VIP] %N %s %s", iClient, GetClientLanguage(i) == RussianLanguageId ? "Подключился":"Connected", szBuffer);
 		}
 	}
 

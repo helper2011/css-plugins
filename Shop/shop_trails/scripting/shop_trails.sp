@@ -18,6 +18,7 @@ KeyValues Config;
 
 int Team[MAXPLAYERS+1];
 int Entity[MAXPLAYERS + 1];
+int RussianLanguageId;
 ItemId Trail[MAXPLAYERS+1];
 
 public Plugin myinfo =
@@ -31,6 +32,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	LoadConfig();
 	HookEvent("player_spawn", OnPlayerSpawn);
 	HookEvent("player_death", OnPlayerDeath);
@@ -92,7 +97,7 @@ public void HideTrailsMenuHandler(int iClient, CookieMenuAction action, any info
 	{
 		case CookieMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlen, "%s: [%s]", GetClientLanguage(iClient) == 22 ? "Скрытие трейлов":"Hide trails", HideTrails[iClient] ? "✔":"×");
+			FormatEx(buffer, maxlen, "%s: [%s]", GetClientLanguage(iClient) == RussianLanguageId ? "Скрытие трейлов":"Hide trails", HideTrails[iClient] ? "✔":"×");
 		}
 		case CookieMenuAction_SelectOption:
 		{
@@ -105,7 +110,7 @@ public void HideTrailsMenuHandler(int iClient, CookieMenuAction action, any info
 void SetClientCookieBool(int iClient)
 {
 	HideTrails[iClient] = !HideTrails[iClient];
-	PrintHintText(iClient, "%s: [%s]", GetClientLanguage(iClient) == 22 ? "Скрытие трейлов":"Hide trails", HideTrails[iClient] ? "✔":"×");
+	PrintHintText(iClient, "%s: [%s]", GetClientLanguage(iClient) == RussianLanguageId ? "Скрытие трейлов":"Hide trails", HideTrails[iClient] ? "✔":"×");
 	if(AreClientCookiesCached(iClient))
 	{
 		SetClientCookie(iClient, HideCookie, HideTrails[iClient] ? "1":"");

@@ -10,7 +10,8 @@ static const char g_sFeature[] = "RegenHP";
 Handle Timer;
 
 int m_iHealth, 
-	Health[MAXPLAYERS + 1] = {100, ...};
+	Health[MAXPLAYERS + 1] = {100, ...},
+	RussianLanguageId;
 
 #define REGEN_COUNT 1
 #define REGEN_DELAY 3.0
@@ -24,6 +25,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	LoadTranslations("vip_modules.phrases");
 	m_iHealth = FindSendPropInfo("CCSPlayer", "m_iHealth");
 	
@@ -61,7 +66,7 @@ public bool OnItemDisplay (int iClient, const char[] szFeature, char[] szDisplay
 {
 	if(VIP_IsClientFeatureUse(iClient, g_sFeature))
 	{
-		FormatEx(szDisplay, iMaxLength, "%T [%i HP/%.0f%c]", g_sFeature, iClient, REGEN_COUNT, REGEN_DELAY, GetClientLanguage(iClient) == 22 ? 'c':'s');
+		FormatEx(szDisplay, iMaxLength, "%T [%i HP/%.0f%c]", g_sFeature, iClient, REGEN_COUNT, REGEN_DELAY, GetClientLanguage(iClient) == RussianLanguageId ? 'c':'s');
 		return true;
 	}
 	return false;

@@ -6,6 +6,8 @@ ConVar ProtectTime;
 
 Handle Timer;
 
+int RussianLanguageId;
+
 public Plugin myinfo =
 {
 	name		= "[Surf] Spawn Protect",
@@ -15,6 +17,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	ProtectTime = CreateConVar("sm_spawn_protect_time", "20.0");
 	HookEvent("player_spawn", OnPlayerSpawn);
 	HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
@@ -85,11 +91,11 @@ void ToggleClientProtect(int iClient, int iValue)
 	{
 		if(iValue)
 		{
-			PrintToChat(iClient, GetClientLanguage(iClient) == 22 ? "Защита отключена":"Protection is disabled");
+			PrintToChat(iClient, GetClientLanguage(iClient) == RussianLanguageId ? "Защита отключена":"Protection is disabled");
 		}
 		else
 		{
-			PrintToChat(iClient, GetClientLanguage(iClient) == 22 ? "Вы защищены на %i сек":"You are protected for %i seconds", RoundToNearest(SpawnProtectTime - GetGameTime()));
+			PrintToChat(iClient, GetClientLanguage(iClient) == RussianLanguageId ? "Вы защищены на %i сек":"You are protected for %i seconds", RoundToNearest(SpawnProtectTime - GetGameTime()));
 		}
 	}
 }

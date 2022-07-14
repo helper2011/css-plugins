@@ -20,7 +20,7 @@ enum
 
 Handle hCookie;
 float OverlayTime[MAXPLAYERS + 1];
-int Hitmarker[MAXPLAYERS + 1] = {HITMARKER_ALL, ...};
+int Hitmarker[MAXPLAYERS + 1] = {HITMARKER_ALL, ...}, RussianLanguageId;
 
 static const char g_sFiles[][] = 
 {
@@ -39,6 +39,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	HookEvent("player_hurt", OnPlayerHurt);
 	SetCookieMenuItem(CookieMenuH, 0, "Hitmarker");
 	RegConsoleCmd("sm_hitmarker", Command_Hitmarker);
@@ -89,7 +93,7 @@ public void CookieMenuH(int iClient, CookieMenuAction action, any info, char[] b
 	{
 		case CookieMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlen, "%s [%s]", GetClientLanguage(iClient) == 22 ? "Хитмаркер":"Hitmarker", Hitmarker[iClient] == HITMARKER_ALL ? "✔":Hitmarker[iClient] == 0 ? "×":"◼");
+			FormatEx(buffer, maxlen, "%s [%s]", GetClientLanguage(iClient) == RussianLanguageId ? "Хитмаркер":"Hitmarker", Hitmarker[iClient] == HITMARKER_ALL ? "✔":Hitmarker[iClient] == 0 ? "×":"◼");
 		}
 		case CookieMenuAction_SelectOption:
 		{
@@ -100,7 +104,7 @@ public void CookieMenuH(int iClient, CookieMenuAction action, any info, char[] b
 
 void HitmarkerMenu(int iClient)
 {
-	bool bRussian = (GetClientLanguage(iClient) == 22);
+	bool bRussian = (GetClientLanguage(iClient) == RussianLanguageId);
 	char szBuffer[256];
 	Menu hMenu = new Menu(HitmarkerMenuH, MenuAction_End | MenuAction_Cancel | MenuAction_Select);
 	hMenu.SetTitle(bRussian ? "Хитмаркер":"Hitmarker");

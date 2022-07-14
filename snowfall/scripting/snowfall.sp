@@ -4,7 +4,7 @@
 
 #pragma newdecls required
 
-int iSnowFlakes[4];
+int iSnowFlakes[4], RussianLanguageId;
 Handle hCookieDisabled;
 bool Disabled[MAXPLAYERS + 1];
 
@@ -22,6 +22,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	RegConsoleCmd("sm_snow", cmdSnowFall);
 	RegConsoleCmd("sm_snowfall", cmdSnowFall);
 	cvarHeight = CreateConVar("sm_snowfall_height", "200.0");
@@ -136,7 +140,7 @@ public void HideSnowMenuHandler(int iClient, CookieMenuAction action, any info, 
 	{
 		case CookieMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlen, "%s: [%s]", GetClientLanguage(iClient) == 22 ? "Снегопад":"Snow fall", Disabled[iClient] ? "×":"✔");
+			FormatEx(buffer, maxlen, "%s: [%s]", GetClientLanguage(iClient) == RussianLanguageId ? "Снегопад":"Snow fall", Disabled[iClient] ? "×":"✔");
 		}
 		case CookieMenuAction_SelectOption:
 		{
@@ -149,7 +153,7 @@ public void HideSnowMenuHandler(int iClient, CookieMenuAction action, any info, 
 void ToggleClientSnowfall(int client)
 {
 	Disabled[client] = !Disabled[client];
-	PrintHintText(client, "%s: [%s]", GetClientLanguage(client) == 22 ? "Снегопад":"Snow fall", Disabled[client] ? "×":"✔");
+	PrintHintText(client, "%s: [%s]", GetClientLanguage(client) == RussianLanguageId ? "Снегопад":"Snow fall", Disabled[client] ? "×":"✔");
 	if(AreClientCookiesCached(client))
 	{
 		SetClientCookie(client, hCookieDisabled, Disabled[client] ? "1":"");
