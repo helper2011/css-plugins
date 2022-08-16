@@ -161,38 +161,37 @@ void PrecacheSongs()
 public Action CS_OnTerminateRound(float& delay, CSRoundEndReason& reason)
 {
 	int iTime = GetTime();
-	if(iTime > CD)
+	if(CD >= iTime)
 	{
-		CD = iTime + CooldownBetween.IntValue;
-		if(Next >= SongsList.Length)
+		return Plugin_Continue;
+	}
+	CD = iTime + CooldownBetween.IntValue;
+	if(Next >= SongsList.Length)
+	{
+		Next = 0;
+	}
+	if(StopSounds.BoolValue)
+	{
+		StopAllSounds();
+	}
+	SongData Song;
+	SongsList.GetArray(Next, Song, sizeof(Song));
+	int iLen = strlen(Song.Title);
+	for(int i = 1;i <= MaxClients; i++)
+	{
+		if(IsClientInGame(i) && !IsFakeClient(i) && Flags[i] & (1 << 0))
 		{
-			Next = 0;
-		}
-		if(StopSounds.BoolValue)
-		{
-			StopAllSounds();
-		}
-		SongData Song;
-		SongsList.GetArray(Next, Song, sizeof(Song));
-		int iLen = strlen(Song.Title);
-		for(int i = 1;i <= MaxClients; i++)
-		{
-			if(IsClientInGame(i) && !IsFakeClient(i) && Flags[i] & (1 << 0))
+			EmitSoundToClient(i, Song.Path, _, _, _, _, float(Volume[i]) / 100.0);
+		
+			if(iLen > 3 && Flags[i] & (1 << 1))
 			{
-				EmitSoundToClient(i, Song.Path, _, _, _, _, float(Volume[i]) / 100.0);
-			
-				if(iLen > 3 && Flags[i] & (1 << 1))
-				{
-					PrintToChat2(i, "%t:{C}FFB273 %s", "Current Song", Song.Title);
-				}
+				PrintToChat2(i, "%t:{C}FFB273 %s", "Current Song", Song.Title);
 			}
 		}
-		Next++;
-		delay = Song.Duration;
-		return Plugin_Changed;
 	}
-	
-	return Plugin_Continue;
+	Next++;
+	delay = Song.Duration;
+	return Plugin_Changed;
 }
 
 public Action Command_Res(int iClient, int iArgs)
@@ -253,7 +252,7 @@ public int ResMenu(Menu hMenu, MenuAction action, int iClient, int iItem)
 			Res(iClient, !!(StringToInt(szBuffer)));
 		}
 	}
-
+	return 0;
 }
 
 public void OnClientPutInServer(int iClient)
@@ -308,7 +307,6 @@ public void OnClientCookiesCached(int iClient)
 	}
 }
 
-
 void PrintToChat2(int iClient, const char[] message, any ...)
 {
 	int iLen = strlen(message) + 255;
@@ -339,7 +337,6 @@ stock void PrintToChatAll2(const char[] message, any ...)
 		}
 	}
 }
-
 
 void SendMessage(int iClient, char[] szBuffer, int iSize)
 {
@@ -396,7 +393,7 @@ stock void StopAllSounds()
 {
 	char szBuffer[256];
 	int iEntity = -1, iLen;
-	while((iEntity = FindEntityByClassname(iEntity, "ambient_generic")) != -1)
+	while((iEntity = FindEntityByClassname(iEntity, "ambient_generic")) != INVALID_ENT_REFERENCE)
 	{
 		for(int i = 1; i <= MaxClients; i++)
 		{
@@ -405,7 +402,7 @@ stock void StopAllSounds()
 				GetEntPropString(iEntity, Prop_Data, "m_iszSound", szBuffer, 256);
 				if((iLen = strlen(szBuffer) - 4) > 0 && (!strcmp(szBuffer[iLen], ".mp3", false) || !strcmp(szBuffer[iLen], ".wav", false)))
 				{
-					EmitSoundToClient(i, szBuffer, iEntity, SNDCHAN_STATIC, SNDLEVEL_NONE, SND_STOP, 0.0, SNDPITCH_NORMAL, _, _, _, true);
+					EmitSoundToClient(i, szBuffer, iEntity, SNDCHAN_STATIC, SNDLEVEL_NONE, SND_STOPLOOPING, SNDVOL_NORMAL, SNDPITCH_NORMAL);
 				}
 			}
 		}

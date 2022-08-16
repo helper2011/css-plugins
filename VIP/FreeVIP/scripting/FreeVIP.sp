@@ -9,9 +9,9 @@ ConVar cvarToggle, cvarVIPGroup, cvarBlockPostAdminCheck;
 
 public void OnPluginStart()
 {
-	cvarToggle = CreateConVar("vip_free_toggle", "1");
+	cvarToggle = CreateConVar("vip_free", "0");
 	cvarVIPGroup = CreateConVar("vip_free_group", "vip_free");
-	cvarBlockPostAdminCheck = CreateConVar("vip_free_block_post_admin_check", "0");
+	cvarBlockPostAdminCheck = CreateConVar("vip_free_auth_block", "1");
 	AutoExecConfig(true, "plugin.FreeVIP", "vip");
 }
 

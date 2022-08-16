@@ -16,6 +16,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	if((RussianLanguageId = GetLanguageByCode("ru")) == -1)
+	{
+		SetFailState("Cant find russian language (see languages.cfg)");
+	}
 	g_hCookie = RegClientCookie("VIP_ConnectMessage", "", CookieAccess_Private);
 	
 	RegConsoleCmd("sm_joinmsg", Command_JoinMsg);
