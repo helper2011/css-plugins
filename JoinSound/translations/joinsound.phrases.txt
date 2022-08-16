@@ -1,0 +1,9 @@
+"Phrases"
+{
+	"Join Sound"
+	{
+		"ru"			"Звук при входе"
+		"en"			"Join Sound"
+	}	
+
+}
