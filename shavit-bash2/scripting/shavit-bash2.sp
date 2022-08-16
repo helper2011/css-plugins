@@ -12,7 +12,7 @@
 
 #undef REQUIRE_EXTENSIONS
 #include <dhooks>
-#include <sendproxy>
+//#include <sendproxy>
 
 
 #pragma newdecls required
@@ -312,7 +312,7 @@ stock void PrintToAdmins(const char[] msg, any...)
 	
 	for (int i = 1; i <= MaxClients; i++)
 	{
-		if (CheckCommandAccess(i, "bash2_chat_log", ADMFLAG_RCON))
+		if (IsClientInGame(i) && CheckCommandAccess(i, "bash2_chat_log", ADMFLAG_RCON))
 		{
 			if(g_bAdminMode[i]) {
 				PrintToChat(i, buffer);
@@ -558,12 +558,18 @@ public void OnMapStart()
 	
 	if(g_bLateLoad)
 	{
+		g_bLateLoad = false;
 		for(int iclient = 1; iclient <= MaxClients; iclient++)
 		{
 			if(IsClientInGame(iclient))
 			{
 				OnClientConnected(iclient);
 				OnClientPutInServer(iclient);
+
+				if(IsClientAuthorized(iclient))
+				{
+					OnClientPostAdminCheck(iclient);
+				}
 			}
 		}
 	}
@@ -587,24 +593,15 @@ public void OnClientConnected(int client)
 	GetClientIP(client, g_sPlayerIp[client], 16);
 }
 
-public void OnClientPostAdminCheck(int client) 
+public void OnClientPostAdminCheck(int iClient) 
 {
-	CreateTimer(5.0, Timer_Auth, client);
-}
-
-public Action Timer_Auth(Handle hTimer, int iClient)
-{
-	if(!IsClientInGame(iClient))
-		return;
-		
 	if (CheckCommandAccess(iClient, "bash2_chat_log", ADMFLAG_RCON))
 	{
 		g_bAdminMode[iClient] = true;
 	}
-	
-	//int iFlags = GetUserFlagBits(iClient);
-	//Ignore[iClient] = (iFlags & ADMFLAG_CUSTOM1 || iFlags & ADMFLAG_GENERIC || iFlags & ADMFLAG_RCON || iFlags & ADMFLAG_ROOT);
+	Ignore[iClient] = (GetUserFlagBits(iClient) & (ADMFLAG_CUSTOM1 | ADMFLAG_GENERIC | ADMFLAG_RCON | ADMFLAG_ROOT));
 }
+
 
 public void OnClientDisconnect(int iClient)
 {
@@ -718,6 +715,9 @@ void QueryForCvars(int client)
 
 public void OnYawSpeedRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	g_iYawSpeed[client] = StringToFloat(cvarValue);
 	
 	if(g_iYawSpeed[client] < 0)
@@ -728,6 +728,9 @@ public void OnYawSpeedRetrieved(QueryCookie cookie, int client, ConVarQueryResul
 
 public void OnYawRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	float mYaw = StringToFloat(cvarValue);
 	if(mYaw != g_mYaw[client])
 	{
@@ -746,6 +749,9 @@ public void OnYawRetrieved(QueryCookie cookie, int client, ConVarQueryResult res
 
 public void OnFilterRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	bool mFilter = (0.0 <= StringToFloat(cvarValue) < 1.0)?false:true;
 	if(mFilter != g_mFilter[client])
 	{
@@ -764,6 +770,9 @@ public void OnFilterRetrieved(QueryCookie cookie, int client, ConVarQueryResult 
 
 public void OnCustomAccelRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	int mCustomAccel = StringToInt(cvarValue);
 	
 	if(mCustomAccel != g_mCustomAccel[client])
@@ -783,6 +792,9 @@ public void OnCustomAccelRetrieved(QueryCookie cookie, int client, ConVarQueryRe
 
 public void OnCustomAccelMaxRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	float mCustomAccelMax = StringToFloat(cvarValue);
 	
 	if(mCustomAccelMax != g_mCustomAccelMax[client])
@@ -801,6 +813,9 @@ public void OnCustomAccelMaxRetrieved(QueryCookie cookie, int client, ConVarQuer
 
 public void OnCustomAccelScaleRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	float mCustomAccelScale = StringToFloat(cvarValue);
 	
 	if(mCustomAccelScale != g_mCustomAccelScale[client])
@@ -820,6 +835,9 @@ public void OnCustomAccelScaleRetrieved(QueryCookie cookie, int client, ConVarQu
 
 public void OnCustomAccelExRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	float mCustomAccelExponent = StringToFloat(cvarValue);
 	
 	if(mCustomAccelExponent != g_mCustomAccelExponent[client])
@@ -839,6 +857,9 @@ public void OnCustomAccelExRetrieved(QueryCookie cookie, int client, ConVarQuery
 
 public void OnRawInputRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	bool mRawInput = (0.0 <= StringToFloat(cvarValue) < 1.0)?false:true;
 	if(mRawInput != g_mRawInput[client])
 	{
@@ -857,6 +878,9 @@ public void OnRawInputRetrieved(QueryCookie cookie, int client, ConVarQueryResul
 
 public void OnSensitivityRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	float sensitivity = StringToFloat(cvarValue);
 	if(sensitivity != g_Sensitivity[client])
 	{
@@ -875,6 +899,9 @@ public void OnSensitivityRetrieved(QueryCookie cookie, int client, ConVarQueryRe
 
 public void OnYawSensitivityRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	float sensitivity = StringToFloat(cvarValue);
 	if(sensitivity != g_JoySensitivity[client])
 	{
@@ -893,6 +920,9 @@ public void OnYawSensitivityRetrieved(QueryCookie cookie, int client, ConVarQuer
 
 public void OnZoomSensitivityRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+
 	float sensitivity = StringToFloat(cvarValue);
 	if(sensitivity != g_ZoomSensitivity[client])
 	{
@@ -911,6 +941,9 @@ public void OnZoomSensitivityRetrieved(QueryCookie cookie, int client, ConVarQue
 
 public void OnJoystickRetrieved(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
+	if(result != ConVarQuery_Okay)
+		return;
+		
 	bool joyStick = (0.0 <= StringToFloat(cvarValue) < 1.0)?false:true;
 	if(joyStick != g_JoyStick[client])
 	{
