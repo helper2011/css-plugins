@@ -201,63 +201,71 @@ public void OnPlayerHurt(Event hEvent, const char[] name, bool bDontBroadcast)
 
 public Action Timer_Explode(Handle hTimer, int iClient)
 {
-	if(!IsClientInGame(iClient) || ClientExplodeTime[iClient] <= 0 || !IsPlayerAlive(iClient) || GetClientTeam(iClient) != 2 || !ClientOwner[iClient] || !IsClientInGame(ClientOwner[iClient]) || !IsPlayerAlive(ClientOwner[iClient]) || GetClientTeam(ClientOwner[iClient]) != 3)
+	if(	IsClientInGame(iClient) && 
+		ClientExplodeTime[iClient] > 0 && 
+		IsPlayerAlive(iClient) && 
+		GetClientTeam(iClient) == 2 && 
+		ClientOwner[iClient] != 0 && 
+		IsClientInGame(ClientOwner[iClient]) && 
+		IsPlayerAlive(ClientOwner[iClient]) && 
+		GetClientTeam(ClientOwner[iClient]) == 3)
 	{
-		ClientOwner[iClient] = 
-		ClientExplodeTime[iClient] = 0;
-		return Plugin_Stop;
-	}
-	ClientExplodeTime[iClient]--;
+		ClientExplodeTime[iClient]--;
 	
-	switch(ClientExplodeTime[iClient])
-	{
-		case 0:
+		switch(ClientExplodeTime[iClient])
 		{
-			if(Settings[CONVAR_EXPLODE_LAST_ZOMBIE] || GetZombiesCount(1) > 1)
+			case 0:
+			{
+				if(Settings[CONVAR_EXPLODE_LAST_ZOMBIE] || GetZombiesCount(1) > 1)
+				{
+					if(Settings[CONVAR_MINE_MODE] < 2)
+					{
+						EmitSoundToAll(BoomSound, iClient);
+					}
+					ForceDeath[iClient] = true;
+					ForcePlayerSuicide(iClient);
+					Event hEvent = CreateEvent("player_death", true);
+					if(hEvent)
+					{
+						hEvent.SetInt("userid", GetClientUserId(iClient));
+						hEvent.SetInt("attacker", GetClientUserId(ClientOwner[iClient]));
+						hEvent.SetString("weapon", "knife");
+						hEvent.Fire();
+					}
+					SetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags", GetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags") + 1);
+					Explodes++;
+					ClientExplodes[ClientOwner[iClient]]++;
+				}
+				ClientOwner[iClient] = 0;
+				ClientExplodeTime[iClient] = 0;
+				return Plugin_Stop;
+			}
+			case 1:
 			{
 				if(Settings[CONVAR_MINE_MODE] < 2)
 				{
-					EmitSoundToAll(BoomSound, iClient);
+					EmitSoundToAll(PreBoomSound, iClient);
 				}
-				ForceDeath[iClient] = true;
-				ForcePlayerSuicide(iClient);
-				Event hEvent = CreateEvent("player_death", true);
-				if(hEvent)
+				if(Settings[CONVAR_EXPLODE_LAUNCH])
 				{
-					hEvent.SetInt("userid", GetClientUserId(iClient));
-					hEvent.SetInt("attacker", GetClientUserId(ClientOwner[iClient]));
-					hEvent.SetString("weapon", "knife");
-					hEvent.Fire();
+					TeleportEntity(iClient, NULL_VECTOR, NULL_VECTOR, view_as<float>({0.0, 0.0, 2000.0}));
 				}
-				SetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags", GetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags") + 1);
-				Explodes++;
-				ClientExplodes[ClientOwner[iClient]]++;
 			}
-			ClientOwner[iClient] = 0;
-			ClientExplodeTime[iClient] = 0;
-			return Plugin_Stop;
-		}
-		case 1:
-		{
-			if(Settings[CONVAR_MINE_MODE] < 2)
+			default:
 			{
-				EmitSoundToAll(PreBoomSound, iClient);
-			}
-			if(Settings[CONVAR_EXPLODE_LAUNCH])
-			{
-				TeleportEntity(iClient, NULL_VECTOR, NULL_VECTOR, view_as<float>({0.0, 0.0, 2000.0}));
+				if(!Settings[CONVAR_MINE_MODE])
+				{
+					EmitSoundToAll(BeepSound, iClient);
+				}
 			}
 		}
-		default:
-		{
-			if(!Settings[CONVAR_MINE_MODE])
-			{
-				EmitSoundToAll(BeepSound, iClient);
-			}
-		}
+
+		return Plugin_Continue;
 	}
+	ClientOwner[iClient] = 
+	ClientExplodeTime[iClient] = 0;
+	return Plugin_Stop;
 	
-	return Plugin_Continue;
 }
 
 int GetClientMines(int iClient)
