@@ -1,4 +1,4 @@
-int g_iVelocity, g_iStamina;
+//int g_iVelocity, g_iStamina;
 
 public Plugin myinfo = 
 {
@@ -10,8 +10,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	g_iVelocity = FindSendPropInfo("CCSPlayer", "m_flVelocityModifier");
-	g_iStamina = FindSendPropInfo("CCSPlayer", "m_flStamina");
+	/*g_iVelocity = FindSendPropInfo("CCSPlayer", "m_flVelocityModifier");
+	g_iStamina = FindSendPropInfo("CCSPlayer", "m_flStamina");*/
 }
 
 
@@ -23,13 +23,13 @@ public Action OnPlayerRunCmd(int iClient, int& iButtons)
 	
 	static int initButtons;
 	initButtons = iButtons;
-	if (GetEntDataFloat(iClient, g_iVelocity) < 1.0)
+	/*if (GetEntDataFloat(iClient, g_iVelocity) < 1.0)
 	{
 		SetEntDataFloat(iClient, g_iVelocity, 1.0, true);
-	}
+	}*/
 	if (iButtons & IN_JUMP && !(GetEntityFlags(iClient) & FL_ONGROUND) && GetEntProp(iClient, Prop_Data, "m_nWaterLevel") <= 1)
 	{
-		SetEntDataFloat(iClient, g_iStamina, 0.0);
+		//SetEntDataFloat(iClient, g_iStamina, 0.0);
 		iButtons &= ~IN_JUMP;
 	}
 	
