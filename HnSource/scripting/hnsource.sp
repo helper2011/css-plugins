@@ -61,7 +61,7 @@ public Plugin:myinfo =
 public OnPluginStart()
 {
 	CreateConVar("hns_version", PLUGIN_VERSION, "Version of the Plugin", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	HookEvent("round_freeze_end", Event_RoundStart);
+	HookEvent("round_start", Event_RoundStart);
 	// HookEvent("round_freeze_end", Event_RoundStartFreeze);
 	HookEvent("round_end", Event_RoundEnd);
 	HookEvent("player_spawn", Event_PlayerSpawn);
@@ -570,21 +570,25 @@ public Action:removeSlow(Handle:Timer, any:client)
 }
 
 
-public OnEntityCreated(entity, const String:classname[])
+/*public OnEntityCreated(entity, const String:classname[])
 {
 	if (StrEqual(classname, "hegrenade_projectile"))
 	{
 		SDKHook(entity, SDKHook_Spawn, OnEntitySpawned);
 	}
-}
+}*/
 
-public OnEntitySpawned(entity)
+public OnEntitySpawned(entity, const String:classname[])
 {
-	if (GetConVarBool(hns_freeze_enable))
+	
+	if (StrEqual(classname, "hegrenade_projectile"))
 	{
-		// PrintToChatAll("ent spawned");
-		SetEntPropFloat(entity, Prop_Send, "m_flDamage", 2.0);
-		SetEntPropFloat(entity, Prop_Send, "m_DmgRadius", GetConVarFloat(hns_freeze_radius));
+		if (GetConVarBool(hns_freeze_enable))
+		{
+			// PrintToChatAll("ent spawned");
+			SetEntPropFloat(entity, Prop_Send, "m_flDamage", 2.0);
+			SetEntPropFloat(entity, Prop_Send, "m_DmgRadius", GetConVarFloat(hns_freeze_radius));
+		}
 	}
 }
 
