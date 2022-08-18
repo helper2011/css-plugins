@@ -9,15 +9,14 @@ new g_iMaxClients = 0, String:g_szPlayerManager[20] = "", g_iPlayerManager = -1,
 public Plugin:myinfo ={name = "Bot Ping [L]",    author = "Danyas"};
 public OnPluginStart()
 {
-    g_iPing    = FindSendPropOffs("CPlayerResource", "m_iPing");
+    g_iPing    = FindSendPropInfo("CPlayerResource", "m_iPing");
     strcopy(g_szPlayerManager, sizeof(g_szPlayerManager), "cs_player_manager");
     CreateTimer(INTERVAL,SetPing,_,TIMER_REPEAT);
 }
 
 public OnMapStart()
 {
-    g_iMaxClients        = GetMaxClients();
-    g_iPlayerManager    = FindEntityByClassname(g_iMaxClients + 1, g_szPlayerManager);
+    g_iPlayerManager    = FindEntityByClassname(MaxClients + 1, g_szPlayerManager);
 }
 
 public Action:SetPing(Handle:timer)

@@ -104,6 +104,7 @@ public Action Timer_DeleteEntities(Handle hTimer)
 	{
 		DeleteHeadEntity(i);
 	}
+	return Plugin_Continue;
 }
 
 void Decapitate(int iClient)

@@ -164,6 +164,7 @@ public Action Timer_InitEntities(Handle hTimer)
             SDKHook(i, SDKHook_OnTakeDamagePost, OnTakeDamagePost);
         }
     }
+    return Plugin_Continue;
 }
 
 public void OnTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype)
@@ -199,8 +200,8 @@ public Action CS_OnCSWeaponDrop(int iClient, int iWeapon)
     if(Weapon != -1 && Weapon == iWeapon)
     {
         RequestFrame(OnWeaponDroppedNext, EntIndexToEntRef(iWeapon));
-
     }
+    return Plugin_Continue;
 }
 
 void OnWeaponDroppedNext(int iWeapon)

@@ -109,7 +109,7 @@ public void OnClientDisconnect(int iClient)
 	}
 }
 
-bool ToggleHook(bool bToggle)
+void ToggleHook(bool bToggle)
 {
 	if(Hook != bToggle)
 	{
@@ -148,6 +148,7 @@ public Action OnListenCommand(int client, const char[] command, int argc)
 			
 		}
 	}
+	return Plugin_Continue;
 }
 
 void LogCommands()

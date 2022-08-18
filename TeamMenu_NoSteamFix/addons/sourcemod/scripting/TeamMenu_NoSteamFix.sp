@@ -38,4 +38,6 @@ public Action OnCommand(int iClient, const char[] command, int iArgs)
 		}
 		ClientCommand(iClient, "jointeam %i", iTeam);
 	}
+
+	return Plugin_Continue;
 }

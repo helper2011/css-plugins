@@ -62,6 +62,7 @@ public void VIP_OnClientLoaded(int iClient, bool bIsVIP)
 public Action ItemSelect(int iClient, const char[] szFeature, VIP_ToggleState eOldStatus, VIP_ToggleState &eNewStatus)
 {
 	Hitmarker[iClient] = (eNewStatus == ENABLED);
+	return Plugin_Continue;
 }
 
 
@@ -83,7 +84,7 @@ public void OnMapStart()
 	}
 }
 
-public void player_hurt(Event hEvent, const char[] event, bool bDontBroadcast)
+public void OnPlayerHurt(Event hEvent, const char[] event, bool bDontBroadcast)
 {
 	int iAttacker = GetClientOfUserId(hEvent.GetInt("attacker"));
 	
@@ -111,4 +112,6 @@ public Action Timer_RemoveHitMarker(Handle hTimer, int iClient)
 	Overlay[iClient] = false;
 	if(IsClientInGame(iClient)) 
 		ClientCommand(iClient, "r_screenoverlay off");
+
+	return Plugin_Continue;
 }

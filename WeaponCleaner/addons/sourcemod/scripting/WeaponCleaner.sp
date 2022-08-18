@@ -89,6 +89,8 @@ public Action Timer_StartRound(Handle hTimer)
 {
 	StartRoundTimer = null;
 	RoundIsStarted = true;
+
+	return Plugin_Continue;
 }
 
 public void OnRoundEnd(Event hEvent, const char[] event, bool bDontBroadcast)
@@ -111,6 +113,8 @@ public Action Timer_OnEntitySpawned(Handle hTimer, int entity)
 	{
 		InsertWeapon(entity);
 	}
+
+	return Plugin_Continue;
 }
 
 void ToggleTimer(bool bToggle)
@@ -229,6 +233,7 @@ bool RemoveWeapon(int iWeapon, bool bForce = false)
 public Action CS_OnCSWeaponDrop(int client, int weaponIndex)
 {
 	RequestFrame(OnWeaponDropped, weaponIndex);
+	return Plugin_Continue;
 }
 
 public void OnWeaponDropped(int weapon)

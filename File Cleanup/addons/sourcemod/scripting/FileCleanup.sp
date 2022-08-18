@@ -237,22 +237,24 @@ public SMCResult OnNewSection(SMCParser hSMC, const char[] szName, bool bOptQuot
   gc_iCleanupTime = 0;
 
   strcopy(gc_szKeyName, sizeof(gc_szKeyName), szName);
+
+  return SMCParse_Continue;
 }
 
 public SMCResult OnEndSection(SMCParser hSMC) {
   if (!gc_szDirectory[0]) {
     LogErr("Can't start cleanup with keyname %s: directory not passed.", gc_szKeyName);
-    return;
+    return SMCParse_Continue;
   }
 
   if (!DirExists(gc_szDirectory)) {
     LogErr("Can't start cleanup with keyname %s: passed directory (%s) doesn't exists.", gc_szKeyName, gc_szDirectory);
-    return;
+    return SMCParse_Continue;
   }
 
   if (gc_iCleanupTime < 1) {
     LogErr("Can't start cleanup with keyname %s: maximum lifetime for files not passed.", gc_szKeyName);
-    return;
+    return SMCParse_Continue;
   }
 
   if (!UTIL_InArray(gc_eCleanupMode, {FileTime_LastChange, FileTime_Created, FileTime_LastAccess}, 3)) {
@@ -261,6 +263,8 @@ public SMCResult OnEndSection(SMCParser hSMC) {
   }
 
   CleanDirectory(gc_szDirectory, gc_iCleanupTime, gc_eCleanupMode, gc_szFileEnding, gc_szFileStarts, gc_bIncludeSubdirs);
+
+  return SMCParse_Continue;
 }
 
 public SMCResult OnKeyValue(SMCParser hSMC, const char[] szKey, const char[] szValue, bool bKeyQuotes, bool bValueQuotes) {
@@ -272,33 +276,35 @@ public SMCResult OnKeyValue(SMCParser hSMC, const char[] szKey, const char[] szV
       strcopy(gc_szDirectory[iLength], sizeof(gc_szDirectory), "/");
     }
 
-    return;
+    return SMCParse_Continue;
   }
 
   if (!strcmp(szKey, "lifetime", false)) {
     gc_iCleanupTime = UTIL_ParseTime(szValue);
-    return;
+    return SMCParse_Continue;
   }
 
   if (!strcmp(szKey, "starts_with", false)) {
     strcopy(gc_szFileStarts, sizeof(gc_szFileStarts), szValue);
-    return;
+    return SMCParse_Continue;
   }
 
   if (!strcmp(szKey, "ends_with", false)) {
     strcopy(gc_szFileEnding, sizeof(gc_szFileEnding), szValue);
-    return;
+    return SMCParse_Continue;
   }
 
   if (!strcmp(szKey, "include_subdirectories", false)) {
     gc_bIncludeSubdirs = (szValue[0] != '0');
-    return;
+    return SMCParse_Continue;
   }
 
   if (!strcmp(szKey, "timemode", false)) {
     gc_eCleanupMode = view_as<FileTimeMode>(StringToInt(szValue));
-    return;
+    return SMCParse_Continue;
   }
+
+  return SMCParse_Continue;
 }
 
 /**

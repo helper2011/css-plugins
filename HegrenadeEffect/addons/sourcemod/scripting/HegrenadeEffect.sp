@@ -51,4 +51,6 @@ public Action Timer_DeleteEntity(Handle hTimer, int entity)
 	{
 		AcceptEntityInput(entity, "kill");
 	}
+
+	return Plugin_Continue;
 }

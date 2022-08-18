@@ -8,30 +8,6 @@ int KillT[2], KillCT[2], WinCT[2], WinT[2], MinRoundTime;
 
 ConVar cvarPath, cvarRoundMinTime;
 
-enum
-{
-	ONLINE_30_MINUTES,
-	ONLINE_60_MINUTES,
-	ONLINE_90_MINUTES,
-	ONLINE_120_MINUTES,
-	ONLINE_150_MINUTES,
-	ONLINE_180_MINUTES,
-	ONLINE_210_MINUTES,
-	ONLINE_240_MINUTES,
-	ONLINE_270_MINUTES,
-	ONLINE_300_MINUTES,
-	ONLINE_330_MINUTES,
-	ONLINE_360_MINUTES
-	
-}
-
-static const int Minutes[][] = {30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360, 390, 420, 450, 480, 510, 540, 570, 600};
-
-int	
-	ClientOnlineId[MAXPLAYERS + 1],
-	ClientOnline[MAXPLAYERS + 1],
-	RewardOnline[sizeof(Minutes)];
-	
 public Plugin myinfo =
 {
 	name		= "[Shop] Earnings",
@@ -73,19 +49,6 @@ public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newV
 	LoadConfig();
 }
 
-public void OnMapStart()
-{
-	if(Online[0][0])
-	{
-		CreateTimer(60.0, Timer_CheckOnline, _, TIMER_REPEAT | TIMER_FLAG_NO_MAPCHANGE);
-	}
-}
-
-public Action Timer_CheckOnline(Handle hTimer)
-{
-
-}
-
 void LoadConfig()
 {
 	char szBuffer[256];
@@ -117,48 +80,6 @@ void LoadConfig()
 		if(WinT[0] || WinT[1] || WinCT[0] || WinCT[1])
 		{
 			HookEvent("round_end", OnRoundEnd);
-		}
-	}
-	hKeyValues.Rewind();
-	if(hKeyValues.JumpToKey("online") && hKeyValues.GotoFirstSubKey(false))
-	{
-		int iCount;
-		do
-		{
-			hKeyValues.GetSectionName(szBuffer, 256);
-			Online[0][iCount] = StringToInt(szBuffer);
-			hKeyValues.GetString(NULL_STRING, szBuffer, 256);
-			Online[1][iCount] = StringToInt(szBuffer);
-			iCount++;
-		}
-		while(hKeyValues.GotoNextKey(false) && iCount < 10);
-		
-		if(iCount)
-		{
-			PrintOnlineArray();
-			int iIndex, iTemp[2];
-			for(int i; i < iCount; i++)
-			{
-				iIndex = -1;
-				for(int j = i; j < iCount; j++)
-				{
-					if(iIndex == -1 || Online[0][j] > Online[0][iIndex])
-					{
-						iIndex = j;
-					}
-				}
-				if(iIndex != -1 && iIndex != i)
-				{
-					iTemp[0] = Online[0][i];
-					iTemp[1] = Online[1][i];
-					Online[0][i] = Online[0][iIndex];
-					Online[1][i] = Online[1][iIndex];
-					Online[0][iIndex] = iTemp[0];
-					Online[1][iIndex] = iTemp[1];
-				}
-			}
-		
-			PrintOnlineArray();
 		}
 	}
 	delete hKeyValues;
@@ -257,18 +178,3 @@ public void OnPlayerDeath(Event hEvent, const char[] szName, bool bDontBroadcast
 		}
 	}
 }
-
-
-
-stock void PrintOnlineArray()
-{
-	PrintToServer("PrintOnlineArray");
-	for(int i; i < 10; i++)
-	{
-		if(Online[0][i] == 0)
-			break;
-		
-		PrintToServer("%i sec = %i cred", Online[0][i], Online[1][i]);
-	}
-}
-

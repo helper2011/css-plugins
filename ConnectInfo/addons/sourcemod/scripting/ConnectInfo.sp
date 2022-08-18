@@ -99,6 +99,7 @@ void CheckStatus(int iClient, int iInfo, bool bTimer = true)
 public Action Timer_Info(Handle hTimer, int iClient)
 {
 	CheckStatus(iClient, 0, false);
+	return Plugin_Continue;
 }
 
 public void OnClientDisconnect(int iClient)

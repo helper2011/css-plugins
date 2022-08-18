@@ -166,6 +166,7 @@ public int MenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
 			AskConnectMenu(iClient, iItem);
 		}
 	}
+	return 0;
 }
 
 void AskConnectMenu(int iClient, int iServerId)
@@ -213,6 +214,7 @@ public int AskMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
 			}
 		}
 	}
+	return 0;
 }
 
 public Action RefreshServerInfo(Handle timer)
@@ -227,6 +229,7 @@ public Action RefreshServerInfo(Handle timer)
 	}
 
 	CreateTimer(SERVER_TIMEOUT, CleanUp);
+	return Plugin_Continue;
 }
 
 public Action CleanUp(Handle timer)
@@ -239,6 +242,7 @@ public Action CleanUp(Handle timer)
 			CloseHandle(socket[i]);
 		}
 	}
+	return Plugin_Continue;
 }
 
 public Action Timer_Advert(Handle hTimer)
@@ -271,12 +275,13 @@ public Action Timer_Advert(Handle hTimer)
 		if(!Info[CurrentAdvertServer][0])
 		{
 			StartAdvertTimer();
-			return;
+			return Plugin_Continue;
 		}
 	}
 	
 	PrintToChatAll("\x04[\x03hop\x04]\x01 %t", "Advert", Info[CurrentAdvertServer]);
 	StartAdvertTimer();
+	return Plugin_Continue;
 }
 
 public void OnSocketConnected(Handle sock, int iServerId)
@@ -289,7 +294,7 @@ stock int GetByte(const char[] receiveData, int offset )
 	return receiveData[offset];
 }
 
-stock char GetString(char[] receiveData, int dataSize, int offset)
+stock char[] GetString(char[] receiveData, int dataSize, int offset)
 {
 	char serverStr[256];
 	for (int i = offset, j; i < dataSize; i++ ) 

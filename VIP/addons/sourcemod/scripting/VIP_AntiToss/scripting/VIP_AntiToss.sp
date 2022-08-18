@@ -73,6 +73,7 @@ public void VIP_OnVIPLoaded()
 public Action OnClientToggleItem(int iClient, const char[] feature, VIP_ToggleState oldstatus, VIP_ToggleState &newstatus)
 {
 	Use[iClient] = (newstatus == ENABLED);
+	return Plugin_Continue;
 }
 
 public void VIP_OnVIPClientLoaded(int iClient)
@@ -127,4 +128,5 @@ public void OnRoundFire(Event hEvent, const char[] szName, bool bDontBroadcast)
 public Action Timer_RoundStart(Handle hTimer)
 {
 	RoundIsStarted = true;
+	return Plugin_Continue;
 }

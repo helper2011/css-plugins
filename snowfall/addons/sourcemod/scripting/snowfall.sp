@@ -132,6 +132,8 @@ public Action OnPlayerRunCmd(int client, int &buttons)
 		
 		TE_SendToClient(client);
 	}
+
+	return Plugin_Continue;
 }
 
 public void HideSnowMenuHandler(int iClient, CookieMenuAction action, any info, char[] buffer, int maxlen)

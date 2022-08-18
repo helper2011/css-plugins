@@ -174,6 +174,8 @@ public Action Timer_PlayJoinSound(Handle hTimer, int iClient)
 		}
 		EmitSoundToClient(iClient, Sound[PlayType ? RandomSound:GetRandomInt(0, Sounds - 1)]);
 	}
+
+	return Plugin_Continue;
 }
 
 public void OnClientDisconnect(int iClient)
@@ -235,7 +237,7 @@ bool GetClientCookieBool(int iClient)
 	return szBuffer[0] ? (!!(StringToInt(szBuffer))):true;
 }
 
-bool SetClientCookieBool(int iClient, bool bToggle)
+void SetClientCookieBool(int iClient, bool bToggle)
 {
 	SetClientCookie(iClient, g_hCookie, bToggle ? "1":"0");
 }

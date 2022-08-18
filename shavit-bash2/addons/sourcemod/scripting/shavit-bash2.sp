@@ -465,7 +465,7 @@ void SaveOldLogs()
 	}
 }*/
 
-stock bool AnticheatLog(int client, const char[] log, any ...)
+stock void AnticheatLog(int client, const char[] log, any ...)
 {
 	char buffer[1024];
 	VFormat(buffer, sizeof(buffer), log, 3);
@@ -532,6 +532,7 @@ public Action OnVGUIMenu(UserMsg msg_id, Protobuf msg, const int[] players, int 
 		GetClientEyeAngles(iclient, g_MOTDTestAngles[iclient]);
 		CreateTimer(0.1, Timer_MOTD, GetClientUserId(iclient));
 	}
+	return Plugin_Continue;
 }
 
 public Action Timer_MOTD(Handle timer, any data)
@@ -548,6 +549,7 @@ public Action Timer_MOTD(Handle timer, any data)
 		}
 		g_bMOTDTest[iclient] = false;
 	}
+	return Plugin_Continue;
 }
 
 public void OnMapStart()
@@ -586,6 +588,7 @@ public Action Timer_UpdateYaw(Handle timer, any data)
 			QueryForCvars(iclient);
 		}
 	}
+	return Plugin_Continue;
 }
 
 public void OnClientConnected(int client)
@@ -599,7 +602,7 @@ public void OnClientPostAdminCheck(int iClient)
 	{
 		g_bAdminMode[iClient] = true;
 	}
-	Ignore[iClient] = (GetUserFlagBits(iClient) & (ADMFLAG_CUSTOM1 | ADMFLAG_GENERIC | ADMFLAG_RCON | ADMFLAG_ROOT));
+	Ignore[iClient] = !!(GetUserFlagBits(iClient) & (ADMFLAG_CUSTOM1 | ADMFLAG_GENERIC | ADMFLAG_RCON | ADMFLAG_ROOT));
 }
 
 
@@ -693,6 +696,7 @@ public Action Hook_GroundFlags(int entity, const char[] PropName, int &iValue, i
 	
 	return Plugin_Changed;
 	#endif
+	return Plugin_Continue;
 }
 
 
@@ -975,6 +979,7 @@ public Action Hook_OnTouch(int client, int entity)
 		g_bTouchesFuncRotating[client] = true;
 	}
 	
+	return Plugin_Continue;
 }
 
 public Action Bash_Stats(int client, int args)
@@ -1125,6 +1130,7 @@ public int BashStats_MainMenu(Menu menu, MenuAction action, int param1, int para
 	{
 		delete menu;
 	}	
+	return 0;
 }
 
 void PerformMOTDTest(int client)
@@ -1221,6 +1227,7 @@ public int BashStats_StartStrafesMenu(Menu menu, MenuAction action, int param1, 
 	{
 		delete menu;
 	}	
+	return 0;
 }
 
 void ShowBashStats_EndStrafes(int client)
@@ -1292,6 +1299,7 @@ public int BashStats_EndStrafesMenu(Menu menu, MenuAction action, int param1, in
 	{
 		delete menu;
 	}	
+	return 0;
 }
 
 void ShowBashStats_KeySwitches(int client)
@@ -1337,6 +1345,7 @@ public int BashStats_KeySwitchesMenu(Menu menu, MenuAction action, int param1, i
 	{
 		delete menu;
 	}	
+	return 0;
 }
 
 void ShowBashStats_KeySwitches_Move(int client)
@@ -1445,6 +1454,7 @@ public int BashStats_KeySwitchesMenu_Move(Menu menu, MenuAction action, int para
 	{
 		delete menu;
 	}	
+	return 0;
 }
 
 float StandardDeviation(int[] array, int size, float mean, bool countZeroes = true)
@@ -1621,6 +1631,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 		g_bTouchesFuncRotating[client] = false;
 		g_bTouchesWall[client] = false;
 	}
+	return Plugin_Continue;
 }
 
 int g_iIllegalYawCount[MAXPLAYERS + 1];
@@ -2331,6 +2342,7 @@ public Action Timer_NullKick(Handle timer, int userid)
 		KickClient(client, "Kicked for potentional movement config");
 		/*PrintToDiscord(client, "Kicked for potential movement config.");*/
 	}
+	return Plugin_Continue;
 }
 
 // If a player triggers this while they are turning and their turning rate is legal from the CheckForIllegalTurning function, then we can probably autoban

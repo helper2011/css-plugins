@@ -115,6 +115,8 @@ public int VoteKillMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
 			hMenu.DisplayAt(iClient, hMenu.Selection, 0);
 		}
 	}
+
+	return 0;
 }
 
 void VoteKill(int iClient, int iTarget)

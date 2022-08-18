@@ -28,8 +28,10 @@ int g_playerFlags[MAX_PLAYERS];
 bool g_groundBoost[MAX_PLAYERS];
 bool g_bouncedOff[2048];
 
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) 
+{
 	g_lateLoaded = late;
+	return APLRes_Success;
 }
 
 public void OnMapStart() {
@@ -56,7 +58,7 @@ public void OnClientDisconnect(int client) {
 	g_playerFlags[client] = 0;
 }
 
-public Action Client_StartTouch(int client, int other) {
+public void Client_StartTouch(int client, int other) {
 	if (!IsValidClient(other, true) || g_playerFlags[other] & FL_ONGROUND || g_skyFrame[other] || g_boostStep[client] || GetGameTime() - g_boostTime[client] < 0.15) {
 		return;
 	}
@@ -244,6 +246,8 @@ public Action Projectile_EndTouch(int entity, int other) {
 	if (!other) {
 		g_bouncedOff[entity] = true;
 	}
+
+	return Plugin_Continue;
 }
 
 public Action Timer_RemoveEntity(Handle timer, any entref) {
@@ -252,4 +256,5 @@ public Action Timer_RemoveEntity(Handle timer, any entref) {
 	if (entity != INVALID_ENT_REFERENCE) {
 		AcceptEntityInput(entity, "Kill");
 	}
+	return Plugin_Continue;
 }

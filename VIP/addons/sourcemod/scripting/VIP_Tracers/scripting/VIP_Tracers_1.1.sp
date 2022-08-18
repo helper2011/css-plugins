@@ -365,7 +365,7 @@ public void Event_BulletImpact(Event hEvent, const char[] eventName, bool bDontB
 	}
 }
 
-bool SetClientCookieBool(int iClient, bool bToggle)
+void SetClientCookieBool(int iClient, bool bToggle)
 {
 	SetClientCookie(iClient, g_hCookie[1], bToggle ? "1":"0");
 }

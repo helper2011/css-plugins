@@ -73,6 +73,7 @@ public int Native_IsClientPossibleLeader(Handle hPlugin, int params)
 public int Native_GiveClientLeader(Handle hPlugin, int params)
 {
 	GiveClientLeader(GetNativeCell(1));
+	return 0;
 }
 
 public Plugin myinfo = 
@@ -462,6 +463,7 @@ public int LeaderMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
 		}
 		case MenuAction_End: delete hMenu;
 	}
+	return 0;
 }
 
 stock void ToggleClientBeacon(int iClient, bool bToggle)
@@ -648,6 +650,8 @@ public Action Timer_RemoveEntity(Handle hTimer, int iClient)
 {
 	g_hTimer2[iClient] = null;
 	KillMarker(iClient);
+
+	return Plugin_Continue;
 }
 
 

@@ -60,7 +60,6 @@ public Plugin:myinfo =
 
 public OnPluginStart()
 {
-	CreateConVar("hns_version", PLUGIN_VERSION, "Version of the Plugin", FCVAR_PLUGIN|FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
 	HookEvent("round_start", Event_RoundStart);
 	// HookEvent("round_freeze_end", Event_RoundStartFreeze);
 	HookEvent("round_end", Event_RoundEnd);
@@ -421,7 +420,7 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 {
 	if (GetConVarBool(hns_realflashnumber))
 	{
-		new client = GetClientOfUserId(GetEventInt(event, "userid"));
+		//new client = GetClientOfUserId(GetEventInt(event, "userid"));
 		// PrintToChatAll("flashamount %i", GetEntData(client, offs_ammo+48));
 	}
 }

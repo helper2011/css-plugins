@@ -778,9 +778,9 @@ stock bool GetPlayerEye(int client, float pos[3])
 	return false;
 }
 
-stock void RotateYaw(float angles[3], float degree)
+/*stock void RotateYaw(float angles[3], float degree)
 {
-    float direction[3], Float:normal[3];
+    float direction[3], normal[3];
     GetAngleVectors( angles, direction, NULL_VECTOR, normal );
     
     new Float:sin = Sine( degree * 0.01745328 );
@@ -802,7 +802,7 @@ stock void RotateYaw(float angles[3], float degree)
 
     float roll = GetAngleBetweenVectors( up, normal, direction );
     angles[2] += roll;
-}
+}*/
 
 int GetClientAimTarget2(int client, bool only_clients = true)
 {
@@ -861,7 +861,7 @@ stock void GetEntityRenderColor2(int entity, int color[4])
 	color[3] = GetEntData(entity, offset + 3, 1);
 }
 
-int SetEntityColor(int entity, int color[4] = {-1, ...})
+void SetEntityColor(int entity, int color[4] = {-1, ...})
 {
 	int dummy_color[4]; 
 	

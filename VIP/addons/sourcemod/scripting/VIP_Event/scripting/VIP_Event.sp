@@ -174,6 +174,7 @@ public int AdminMenu(Menu hMenu, MenuAction action, int iClient, int iItem)
 			LogMessage("[VIP Event] %N couldn't open VIP Event menu cause winners is %i", iClient, Winners);
 		}
 	}
+	return 0;
 }
 
 void EventAdminMenu_Days(int iClient)
@@ -213,6 +214,7 @@ public int AdminMenuDays(Menu hMenu, MenuAction action, int iClient, int iItem)
 			PrintToChat(iClient, "[VIP Event] Победители недоступны или вышли из игры");
 		}
 	}
+	return 0;
 }
 
 

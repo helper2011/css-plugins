@@ -190,6 +190,8 @@ public Action Timer_Auth(Handle hTimer, int iClient)
 			}
 		}
 	}
+
+	return Plugin_Continue;
 }
 
 public void OnClientDisconnect(int iClient)
@@ -266,6 +268,8 @@ public Action Timer_CreateTrail(Handle hTimer, int iClient)
 	{
 		UTIL_CreateTrail(iClient);
 	}
+	
+	return Plugin_Continue;
 }
 
 

@@ -91,20 +91,20 @@ public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newV
 	{
 		case PLAYERS:
 		{
-			if(Toggle[i] != bOldValue)
+			if(Toggle[PLAYERS] != bOldValue)
 			{
 				HookEvent2(PLAYERS, "player_spawn", OnPlayerSpawn);
 			}
-			SetClientsBlock(!Toggle[i]);
+			SetClientsBlock(!Toggle[PLAYERS]);
 		
 		}
 		case HOSTAGES:
 		{
-			if(Toggle[i] != bOldValue)
+			if(Toggle[HOSTAGES] != bOldValue)
 			{
 				HookEvent2(HOSTAGES, "round_start", OnRoundStart);
 			}
-			SetHostagesBlock(!Toggle[i]);
+			SetHostagesBlock(!Toggle[HOSTAGES]);
 		}
 	}
 }
@@ -197,6 +197,8 @@ public void OnRoundStart(Event hEvent, const char[] event, bool bDontBroadcast)
 public Action Timer_OnRoundStart(Handle hTimer, int iClient)
 {
 	SetHostagesBlock(false);
+
+	return Plugin_Continue;
 }
 
 public Action CS_OnCSWeaponDrop(int iClient, int iWeapon)
@@ -205,4 +207,6 @@ public Action CS_OnCSWeaponDrop(int iClient, int iWeapon)
 	{
 		SetEntityBlock(iWeapon, false);
 	}
+
+	return Plugin_Continue;
 }

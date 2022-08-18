@@ -51,6 +51,7 @@ public void OnRound(Event hEvent,  const char[] szName, bool bDontBroadcast)
 public Action Timer_Check(Handle hTimer)
 {
 	ParseConfig();
+	return Plugin_Continue;
 }
 
 void ParseConfig(int iEvent = 0)

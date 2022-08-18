@@ -208,4 +208,6 @@ public Action Timer_OffOverlay(Handle hTimer)
 			ClientCommand(i, "r_screenoverlay off");
 		}
 	}
+
+	return Plugin_Continue;
 }

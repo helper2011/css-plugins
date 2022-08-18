@@ -48,6 +48,8 @@ public int RSPMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
             }
         }
     }
+
+    return 0;
 }
 
 stock void RSP_PointsMenu(int iClient, const char[] prefix = "")

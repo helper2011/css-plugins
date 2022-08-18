@@ -107,4 +107,6 @@ public Action Timer_Protect(Handle hTimer)
 	{
 		ToggleClientProtect(i, 2);
 	}
+
+	return Plugin_Continue;
 }

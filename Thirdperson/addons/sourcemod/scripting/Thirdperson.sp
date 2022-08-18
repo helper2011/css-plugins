@@ -59,6 +59,7 @@ public Action Timer_SetThirdPerson(Handle hTimer, int iClient)
 	{
 		SetThirdPersonView(iClient, true);
 	}
+	return Plugin_Continue;
 }
 	
 void SetThirdPersonView(int iClient, bool bThird)

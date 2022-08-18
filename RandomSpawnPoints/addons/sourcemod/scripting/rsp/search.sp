@@ -128,6 +128,8 @@ public Action Timer_Search(Handle hTimer)
         Point_AddPoint(point);
         Search_AddPoint(point);
     }
+
+    return Plugin_Continue;
 }
 
 stock void Search_AddPoint(SpawnPointData point)

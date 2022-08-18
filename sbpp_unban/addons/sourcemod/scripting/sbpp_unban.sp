@@ -11,17 +11,15 @@ public void OnPluginStart()
 
 public void SQL_OnConnect(Database db, const char[] error, any data)
 {
-	if (db == null)
-	{
-		LogError("%s", error);
-	}
-	else
-	{
-		hDatabase = db;
-	}
-
-    LogMessage("Database = %x", hDatabase);
-
+    if (db == null)
+    {
+    	LogError("%s", error);
+    }
+    else
+    {
+    	hDatabase = db;
+    }   
+    LogMessage("Database = %x", hDatabase); 
     if(hDatabase)
     {
         hDatabase.Query(SQL_CallBack, "SELECT `name`, `authid`, `reason` FROM sb_bans WHERE RemoveType IS NULL AND length = 0", 0);

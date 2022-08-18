@@ -81,6 +81,7 @@ public void OnPluginStart()
 public Action Command_Vuvu(int iC, int iA)
 {
 	ToggleVuvu(!g_hTimer);
+	return Plugin_Continue;
 }
 
 public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
@@ -205,6 +206,7 @@ public Action Timer_Vuvu(Handle hTimer)
 
 	ToggleMode(iMode[GetRandomInt(0, iModes - 1)], true);
 	g_hTimer = CreateTimer(float(GetRandomInt(VuvuData[VUVU_DELAY_MIN], VuvuData[VUVU_DELAY_MAX])), Timer_Vuvu);
+	return Plugin_Continue;
 }
 
 void ToggleMode(int iMode, bool bToggle)
@@ -323,6 +325,7 @@ public Action Timer_Mode(Handle hTimer, int iMode)
 {
 	ModeData[iMode][MODE_TIMER] = 0;
 	ToggleMode(iMode, false);
+	return Plugin_Continue;
 }
 
 stock int FindValue(int[] array, int size, int value)

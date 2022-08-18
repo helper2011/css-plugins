@@ -160,6 +160,7 @@ public void VIP_OnVIPLoaded()
 public Action ItemSelect(int iClient, const char[] szFeature, VIP_ToggleState eOldStatus, VIP_ToggleState &eNewStatus)
 {
 	HideMenu.Display(iClient, 0);
+	return Plugin_Continue;
 }
 
 public int MenuHandler(Menu hMenu, MenuAction action, int iClient, int iItem)
@@ -297,6 +298,7 @@ public Action Timer_SendMessage(Handle hTimer, int iClient)
 	{
 		//VIP_PrintToChatClient(iClient, "Hide is %s", Hide[iClient] ? "enabled":"disabled");
 	}
+	return Plugin_Continue;
 }
 
 void CheckClientHide(int iClient)

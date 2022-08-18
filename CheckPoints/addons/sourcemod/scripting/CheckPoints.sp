@@ -70,6 +70,7 @@ public int CheckPointsMenuHandler(Menu hMenu, MenuAction action, int iClient, in
 		CP_TeleportToPoint(iClient, iItem);
 		CheckPointsMenu(iClient, hMenu.Selection);
 	}
+	return 0;
 }
 
 public Action Command_SaveCheckPoint(int iClient, int iArgs)

@@ -13,14 +13,14 @@ static const int Color[][] =
 	{255, 215, 0, 255} // золотистый
 }
 
-static const char ColorName[][] = 
+/*static const char ColorName[][] = 
 {
 	"Синий",
 	"Желтый",
 	"Золотой",
 	"Серебристый",
 	"Белый"
-}
+}*/
 
 const int Colors = sizeof(Color);
 const int MAX_LIGHTS = 512;
@@ -33,7 +33,7 @@ bool Hide;
 
 public Plugin myinfo = 
 {
-	name = "Christmasification",
+	name = "Christmasification [Edited]",
 	author = "MPQC",
 	description = "Adds some Christmas lights",
 	version = "1.0.3",
@@ -150,6 +150,7 @@ public int LightsMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
 			hMenu.Display(iClient, 0);
 		}
 	}
+	return 0;
 }
 
 public bool TraceEntityFilterPlayer(int entity, int contentsMask)
@@ -302,7 +303,7 @@ void TraceEye(int client, float pos[3])
 	if(TR_DidHit(INVALID_HANDLE)) TR_GetEndPosition(pos, INVALID_HANDLE);
 }
 
-stock void DrawLights(const float[3] startpoint, const float[3] endpoint)
+stock void DrawLights(const float startpoint[3], const float endpoint[3])
 {
 	PrintToConsoleAll("DrawLights");
 	float direction[3], starting[3];

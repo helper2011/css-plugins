@@ -61,6 +61,8 @@ public Action Timer_ResetSpawnData(Handle hTimer)
 {
 	TimerResetSpawnData = null;
 	ResetSpawnData();
+
+	return Plugin_Continue;
 }
 
 public Action Command_Joinclass(int iClient, const char[] command, int iArgs)

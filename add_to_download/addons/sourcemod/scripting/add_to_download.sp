@@ -23,6 +23,7 @@ public Action Command_Add(int iArgs)
 		GetCmdArg(1, szBuffer, 256);
 		LoadPath(szBuffer);
 	}
+	return Plugin_Handled;
 }
 
 public void OnMapStart()
@@ -58,7 +59,6 @@ void LoadPath(char[] sEntry)
 
 void LoadFromDir(const char[] sDir)
 {
-
 	DirectoryListing hDir = OpenDirectory(sDir);
 	if (hDir)
 	{

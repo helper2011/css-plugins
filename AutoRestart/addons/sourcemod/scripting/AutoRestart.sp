@@ -85,6 +85,7 @@ public Action Timer_CheckTime(Handle hTimer)
 	{
 		Announce = view_as<bool>(CreateTimer(0.0, Timer_Announce, 60)); 
 	}
+	return Plugin_Continue;
 }
 
 public Action Timer_Announce(Handle hTimer, int iCoolDown)
@@ -101,4 +102,5 @@ public Action Timer_Announce(Handle hTimer, int iCoolDown)
 		LogMessage("Restarting...");
 		ServerCommand("_restart");
 	}
+	return Plugin_Continue;
 }

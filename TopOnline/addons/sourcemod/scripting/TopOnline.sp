@@ -330,6 +330,7 @@ public Action Command_TopOnline(int iClient, int iArgs)
 
 public int TopMenusH(Menu hMenu, MenuAction action, int iClient, int iItem)
 {
+	return 0;
 }
 
 public Action Timer_CheckPosition(Handle hTimer)
@@ -369,6 +370,8 @@ public Action Timer_CheckPosition(Handle hTimer)
 		}
 		ClientLastPos[i] = fPos;
 	}
+
+	return Plugin_Continue;
 }
 
 public void ConnectCallBack(Database hDatabase, const char[] sError, any data) // Пришел результат соеденения

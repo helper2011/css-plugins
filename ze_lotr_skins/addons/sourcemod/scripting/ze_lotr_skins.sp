@@ -233,6 +233,7 @@ public Action Timer_Auth(Handle hTimer)
 			OnClientPutInServer(i);
 		}
 	}
+	return Plugin_Continue;
 }
 
 public void OnRoundStart(Event hEvent, const char[] name, bool dontbroadcast)
@@ -243,7 +244,6 @@ public void OnRoundStart(Event hEvent, const char[] name, bool dontbroadcast)
 		delete TimerSetSkins;
 		TimerSetSkins = CreateTimer(3.0, Timer_SetSkins);
 	}
-
 }
 
 public Action Timer_SetSkins(Handle hTimer)
@@ -324,6 +324,7 @@ public Action Timer_SetSkins(Handle hTimer)
 	{
 		Damage[i] = 0;
 	}
+	return Plugin_Continue;
 }
 
 bool IsClientTopDefender(int iClient, int iTop[3])

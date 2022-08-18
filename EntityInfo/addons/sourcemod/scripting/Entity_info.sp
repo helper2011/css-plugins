@@ -204,6 +204,7 @@ public Action NearEntities(int iClient, int iArgs)
 			}
 		}
 	}
+	return Plugin_Handled;
 }
 
 public Action WhoEnt(int iClient, int iArgs)
@@ -217,6 +218,7 @@ public Action WhoEnt(int iClient, int iArgs)
 	{
 		GetPropInfo(iClient, iIndex);
 	}
+	return Plugin_Handled;
 }
 
 public bool TraceFilter(int iValue, int iValue2)

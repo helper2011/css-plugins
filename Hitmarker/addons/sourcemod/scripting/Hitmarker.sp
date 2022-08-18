@@ -143,6 +143,7 @@ public int HitmarkerMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
 			}
 		}
 	}
+	return 0;
 }
 
 public Action Command_Hitmarker(int iClient, int iArgs)

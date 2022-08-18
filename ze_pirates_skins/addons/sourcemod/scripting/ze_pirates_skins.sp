@@ -40,6 +40,8 @@ public Action Timer_Auth(Handle hTimer)
 			}
 		}
 	}
+
+	return Plugin_Continue;
 }
 
 public void OnMapStart()
@@ -131,6 +133,8 @@ public Action Timer_SetClientSkin(Handle hTimer, int iClient)
 			}
 		}
 	}
+	
+	return Plugin_Continue;
 }
 
 bool IsValidWeapon(int iWeapon)

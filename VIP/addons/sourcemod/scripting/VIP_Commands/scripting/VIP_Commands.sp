@@ -77,4 +77,5 @@ public Action ItemSelect(int iClient, const char[] szFeature, VIP_ToggleState eO
 			break;
 		}
 	}
+	return Plugin_Continue;
 }

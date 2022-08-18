@@ -64,6 +64,8 @@ public Action Timer_RoundEndTimeout(Handle hTimer)
 		}
 		CS_TerminateRound(5.0, reason, true);
 	}
+
+	return Plugin_Continue;
 }
 
 int FindMapTarget()

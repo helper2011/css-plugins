@@ -31,6 +31,7 @@ public Action Command_ChangeTeam(int iClient, const char[] command, int iArgs)
 	{
 		OnClientDisconnect(iClient);
 	}
+	return Plugin_Continue;
 }
 
 public void OnRoundStart(Event hEvent, const char[] event, bool bDontBroadcast)

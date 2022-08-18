@@ -35,8 +35,6 @@ public void OnPluginStart()
 			}
 		}
 	}
-	
-	
 }
 
 public void OnPluginEnd()
@@ -91,7 +89,6 @@ public void OnClientDisconnect(int iClient)
 		SetClientCookie(iClient, g_hCookie, szBuffer);
 	}
 }
-
 
 void SetClientDefaultSettings(int iClient)
 {
@@ -159,9 +156,8 @@ public int ShowDamageMenuH(Menu hMenu, MenuAction action, int iClient, int iItem
 			ShowDamageMenu(iClient, view_as<bool>(StringToInt(szBuffer)));
 		}
 	}
+	return 0;
 }
-
-
 
 public void OnPlayerHurt(Event hEvent, const char[] event, bool bDontBroadcast)
 {
@@ -197,5 +193,4 @@ public void ShowDamage(int iClient)
 	PrintCenterText(iClient, szBuffer);
 	Damage[iClient] = 0;
 	Victim[iClient] = 0;
-	
 }

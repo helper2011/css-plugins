@@ -139,6 +139,8 @@ public Action Timer_Tick(Handle hTimer)
 		BlinkTime = GetGameTime() + BlinkDuration;
 		BlinkTicks = 0;
 	}
+
+	return Plugin_Continue;
 }
 
 public Action Timer_Tick2(Handle hTimer)
@@ -187,6 +189,8 @@ public Action Timer_Tick2(Handle hTimer)
 			LastViwed[i] = false;
 		}
 	}
+
+	return Plugin_Continue;
 }
 
 bool IsValidKnife(int iClient)

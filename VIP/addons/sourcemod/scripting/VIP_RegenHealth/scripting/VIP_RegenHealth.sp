@@ -86,6 +86,7 @@ public Action Timer_GetClientHealths(Handle hTimer)
 			Health[i] = 100;
 		}
 	}
+	return Plugin_Continue;
 }
 
 public void OnPlayerHurt(Event hEvent, const char[] szName, bool bDontBroadcast)

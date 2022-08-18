@@ -135,6 +135,7 @@ public Action Timer_Advert(Handle hTimer)
 	}
 	
 	g_hTimer = CreateTimer(g_hKeyValues.GetFloat("timer", Delay.FloatValue), Timer_Advert);
+	return Plugin_Continue;
 }
 
 bool IsValidClientLanguage(int iClient, int[] iLanguage, int iLanguages)
