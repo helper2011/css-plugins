@@ -1,0 +1,54 @@
+﻿"Phrases"
+{
+	"display"
+	{
+		"en"			"Stuff"
+		"ru"			"Дополнительно"
+	}
+	"description"
+	{
+		"en"			"Some stuff"
+		"ru"			"Всякие вещи"
+	}
+	"medkit"
+	{
+		"en"			"Medkit"
+		"ru"			"Аптечка"
+	}
+	"medkit_description"
+	{
+		"en"			"Regenerates some health"
+		"ru"			"Пополняет ваше здоровье если вы ранены!!"
+	}
+	"NoMedkit"
+	{
+		"en"			"You have no medkits in the inventory!"
+		"ru"			"У вас нет аптечек в инвентаре!"
+	}
+	"Bought"
+	{
+		"en"			"Type {green}!medicdefault} or {green}!medkit{default} to use a medkit!"
+		"ru"			"Введите в чате {green}!medic{default} или {green}!medkit{default} чтобы использовать аптечку!"
+	}
+	"UsedMedkit"
+	{
+		"en"			"You have used the medkit!"
+		"ru"			"Вы использовали аптечку!"
+	}
+	"EnoughHealth"
+	{
+		"en"			"You have enough health!"
+		"ru"			"У вас достаточное количество здоровья!"
+	}
+	"MustAlive"
+	{
+		"en"			"You must be alive!"
+		"ru"			"Вы должны быть живы!"
+	}
+	"RoundUsed"
+	{
+        "#format"       "{1:i}"
+		"en"			"You have reached the use limit {1} of medkit!"
+		"ru"			"Вы исчерпали лимит использования аптечек за раунд (Лимит: {1})!"
+	}
+}
