@@ -22,7 +22,6 @@ public void OnPluginStart()
 	AddMultiTargetFilter("@alivet", Filter_AliveT, "Alive Zombies", false);
 
 	RegConsoleCmd("sm_admins", Command_Admins, "Currently online admins.");
-
 }
 
 public void OnPluginEnd()

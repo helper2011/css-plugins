@@ -3,7 +3,7 @@
 #include <clientprefs>
 
 #undef REQUIRE_PLUGIN
-#tryinclude <leader>
+#include <leader>
 #define REQUIRE_PLUGIN
 
 #pragma newdecls required

@@ -223,18 +223,22 @@ public Action Timer_Explode(Handle hTimer, int iClient)
 						EmitSoundToAll(BoomSound, iClient);
 					}
 					ForceDeath[iClient] = true;
-					ForcePlayerSuicide(iClient);
-					Event hEvent = CreateEvent("player_death", true);
-					if(hEvent)
+					ForcePlayerSuicide(iClient); // Can call OnClientDisconnect()
+
+					if(ClientOwner[iClient] != 0)
 					{
-						hEvent.SetInt("userid", GetClientUserId(iClient));
-						hEvent.SetInt("attacker", GetClientUserId(ClientOwner[iClient]));
-						hEvent.SetString("weapon", "knife");
-						hEvent.Fire();
+						Event hEvent = CreateEvent("player_death", true);
+						if(hEvent)
+						{
+							hEvent.SetInt("userid", GetClientUserId(iClient));
+							hEvent.SetInt("attacker", GetClientUserId(ClientOwner[iClient]));
+							hEvent.SetString("weapon", "knife");
+							hEvent.Fire();
+						}
+						SetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags", GetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags") + 1);
+						Explodes++;
+						ClientExplodes[ClientOwner[iClient]]++;
 					}
-					SetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags", GetEntProp(ClientOwner[iClient], Prop_Data, "m_iFrags") + 1);
-					Explodes++;
-					ClientExplodes[ClientOwner[iClient]]++;
 				}
 				ClientOwner[iClient] = 0;
 				ClientExplodeTime[iClient] = 0;
