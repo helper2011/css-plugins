@@ -101,13 +101,25 @@ public void OnPluginStart()
 	{
 		SetFailState("Config file \"%s\" doesnt exists...", szBuffer);
 	}
-	
+	int iIp = FindConVar("hostip").IntValue, iPort = FindConVar("hostport").IntValue;
+
+	char buffer[16];
+	int ips[4];
+	ips[0] = (iIp >> 24) & 0x000000FF;
+	ips[1] = (iIp >> 16) & 0x000000FF;
+	ips[2] = (iIp >> 8) & 0x000000FF;
+	ips[3] = iIp & 0x000000FF;
+
+	Format(buffer, sizeof(buffer), "%i.%i.%i.%i", ips[0], ips[1], ips[2], ips[3]);
 	do
 	{
 		hKeyValues.GetSectionName(Name[Servers], 256);
 		hKeyValues.GetString("address", ServerAddress[Servers], 16);
 		Port[Servers] = hKeyValues.GetNum("port", 27015);
-		Servers++;
+		if(strcmp(ServerAddress[Servers], buffer, false) || Port[Servers] != iPort)
+		{
+			Servers++;
+		}
 	}
 	while (hKeyValues.GotoNextKey() && Servers < MAX_SERVERS);
 	delete hKeyValues;
