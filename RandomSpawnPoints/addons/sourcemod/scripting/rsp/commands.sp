@@ -40,11 +40,15 @@ public int RSPMenuH(Menu hMenu, MenuAction action, int iClient, int iItem)
             }
             else if(strcmp(szBuffer, "reload", false) == 0)
             {
-                
+                Point_OnMapEnd();
+                Point_LoadPoints();
+                RSP_Menu(iClient);
             }
             else if(strcmp(szBuffer, "save", false) == 0)
             {
-
+                Search_OnMapEnd();
+                Search_OnMapStart();
+                RSP_Menu(iClient);
             }
         }
     }
@@ -79,8 +83,8 @@ stock void RSP_PointsMenu(int iClient, const char[] prefix = "")
             continue;
         }
 
-        FormatEx(szId, 64, "%i;%i", point.Id, view_as<int>(points));
-        FormatEx(szBuffer, 256,  "#%i\nP: %.0f %.0f %.0f, V: %.0f %.0f %.0f, G: %c", point.Id, point.Position[0],  point.Position[1],  point.Position[2], point.Velocity[0], point.Velocity[1], point.Velocity[2], point.OnGround ? '+':'-');
+        FormatEx(szId, 64, "%i;%i", i, view_as<int>(points));
+        FormatEx(szBuffer, 256,  "#%i\nP: %.0f %.0f %.0f", i, point.Position[0],  point.Position[1],  point.Position[2]);
 
         hMenu.AddItem(szId, szBuffer);
     }

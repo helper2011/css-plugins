@@ -7,6 +7,8 @@
 
 #pragma newdecls required
 
+float LastUseTime[MAXPLAYERS + 1];
+
 int Weapon = -1;
 
 bool Pressed[2048], Toggle[MAXPLAYERS + 1];
@@ -61,6 +63,7 @@ public void OnPluginEnd()
 
 public void OnClientDisconnect(int iClient)
 {
+	LastUseTime[iClient] = 0.0;
 	Toggle[iClient] = false;
 }
 
@@ -169,8 +172,11 @@ public Action Timer_InitEntities(Handle hTimer)
 
 public void OnTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype)
 {
-    if(attacker > 0 && attacker <= MaxClients && !Pressed[victim] && GetClientTeam(attacker) == 2 && Weapon != -1 && Weapon == GetEntPropEnt(attacker, Prop_Data, "m_hActiveWeapon"))
+    float fTime = GetGameTime();
+    //PrintToConsoleAll("%f %f", fTime, LastUseTime[attacker]);
+    if(attacker > 0 && attacker <= MaxClients && fTime - LastUseTime[attacker] > 0.05 && !Pressed[victim] && GetClientTeam(attacker) == 2 && Weapon != -1 && Weapon == GetEntPropEnt(attacker, Prop_Data, "m_hActiveWeapon"))
     {
+        LastUseTime[attacker] = fTime;
         DataPack hPack = new DataPack();
         hPack.WriteCell(attacker);
         hPack.WriteCell(EntIndexToEntRef(victim));

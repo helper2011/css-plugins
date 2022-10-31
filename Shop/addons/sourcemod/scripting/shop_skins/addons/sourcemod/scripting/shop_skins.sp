@@ -130,8 +130,13 @@ public void Shop_Started()
 			if (szBuffer[0])
 			{
 				PrecacheModel(szBuffer, true);
+				result = true;
 			}
-			else if (!result) continue;
+
+			if (!result)
+			{
+				continue;
+			}
 			
 			if (Shop_StartItem(category_id, item))
 			{
@@ -151,8 +156,6 @@ public void Shop_Started()
 		}
 		while (Config.GotoNextKey());
 	}
-	
-	delete Config;
 }
 
 public ShopAction OnEquipItem(int client, CategoryId category_id, const char[] category, ItemId item_id, const char[] item, bool isOn, bool elapsed)

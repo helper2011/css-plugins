@@ -48,5 +48,6 @@ stock void Debug_PrintToRconAdmins(const char[] message)
 
 #else
 #define DebugMessage(%0)
+#define DebugMessage2(%0)
 #define Debug_FileInit(%0)
 #endif

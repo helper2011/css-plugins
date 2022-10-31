@@ -52,7 +52,6 @@ public void OnPluginStart()
 	Sell.AddChangeHook(OnConVarChange);
 	Duration.AddChangeHook(OnConVarChange);
 	
-	LoadTranslations("shop_paintball.phrases");
 	AutoExecConfig(true, "shop_paintball", "shop");
 	HookEvent("bullet_impact", Event_BulletImpact);	
 	
@@ -112,10 +111,14 @@ public bool OnDisplay(int client, CategoryId category_id, const char[] category,
 
 public void OnMapStart()
 {
+	char szBuffer[PLATFORM_MAX_PATH];
 	for(int i; i <= Decals; i++)
 	{
 		DecalIndex[i] = PrecacheDecal(Decal[i][10]);
 		AddFileToDownloadsTable(Decal[i]);
+		strcopy(szBuffer, sizeof(szBuffer), Decal[i]);
+		ReplaceString(szBuffer, sizeof(szBuffer), ".vmt", ".vtf");
+		AddFileToDownloadsTable(szBuffer);
 	}
 }
 

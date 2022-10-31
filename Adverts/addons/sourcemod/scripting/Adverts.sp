@@ -2,14 +2,16 @@
 
 #pragma newdecls required
 
-ConVar Delay, Path;
-Handle g_hTimer;
-KeyValues g_hKeyValues;
-int Adverts[64], ID;
-
-char MC[32], C1[32], C2[32], PREFIX[64];
-
 static const char Types[][] = {"hint", "chat", "center", "hud"};
+
+ConVar Delay;
+ConVar Path;
+Handle Timer;
+KeyValues Config;
+int Adverts[64], CurrentId;
+
+char MainColor[32], Color1[32], Color2[32], Prefix[64];
+
 
 public Plugin myinfo = 
 {

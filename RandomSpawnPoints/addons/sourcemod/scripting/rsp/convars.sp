@@ -6,12 +6,12 @@ enum
 
 enum /* int */
 {
-    MAX_TOTAL_POINTS,
-    MAX_CURRENT_POINTS,
-    POINT_NO_GROUND,
+    ENABLE,
+    MIN_POINTS,
+    MAX_POINTS,
     CENTR_ANGLES,
     SEARCH,
-    SEARCH_NO_GROUND,
+    FRIENDLY_FIRE,
 
     CONVARS_INT_TOTAL
 }
@@ -19,18 +19,7 @@ enum /* int */
 enum /* float */
 {
     POINT_MIN_DIST,
-    POINT_MIN_VEL,
-    POINT_MAX_VEL,
-    POINT_MIN_Z_VEL,
-    POINT_MAX_Z_VEL,
-    POINT_GROUND_RATIO,
     SEARCH_DELAY,
-    SEARCH_MIN_VEL,
-    SEARCH_MAX_VEL,
-    SEARCH_MIN_Z_VEL,
-    SEARCH_MAX_Z_VEL,
-    SEARCH_MIN_DIST,
-    SEARCH_GROUND_RATIO,
     CONVARS_FLOAT_TOTAL
 }
 
@@ -39,6 +28,8 @@ ConVar CVarsFloat[CONVARS_FLOAT_TOTAL];
 
 int CVarsCacheInt[CONVARS_INT_TOTAL];
 float CVarsCacheFloat[CONVARS_FLOAT_TOTAL];
+
+ConVar mp_friendlyfire;
 
 stock int GetConVarInt2(int iCvarId)
 {
@@ -57,25 +48,15 @@ stock float GetConVarFloat2(int iCvarId)
 
 stock void CreateConVars()
 {
-    CreateConVar2(CVAR_INT,     MAX_TOTAL_POINTS,         "max_total_points",     "1000");
-    CreateConVar2(CVAR_INT,     MAX_CURRENT_POINTS,       "max_current_points",   "250");
-    CreateConVar2(CVAR_INT,     POINT_NO_GROUND,          "point_no_ground",      "1");
-    CreateConVar2(CVAR_FLOAT,   POINT_MIN_DIST,            "point_min_dist",        "500");
-    CreateConVar2(CVAR_FLOAT,   POINT_MIN_VEL,            "point_min_vel",        "800");
-    CreateConVar2(CVAR_FLOAT,   POINT_MAX_VEL,            "point_max_vel",        "2000");
-    CreateConVar2(CVAR_FLOAT,   POINT_MIN_Z_VEL,          "point_min_z_vel",      "200");
-    CreateConVar2(CVAR_FLOAT,   POINT_MAX_Z_VEL,          "point_max_z_vel",      "600");
+    mp_friendlyfire = FindConVar("mp_friendlyfire");
+    CreateConVar2(CVAR_INT,     ENABLE,                   "enable",               "1");
+    CreateConVar2(CVAR_INT,     MIN_POINTS,               "min_points",           "100");
+    CreateConVar2(CVAR_INT,     MAX_POINTS,               "max_points",           "250");
+    CreateConVar2(CVAR_FLOAT,   POINT_MIN_DIST,           "point_min_dist",       "1000");
     CreateConVar2(CVAR_INT,     CENTR_ANGLES,             "centr_angles",         "1");
     CreateConVar2(CVAR_INT,     SEARCH,                   "search",               "1");
+    CreateConVar2(CVAR_INT,     FRIENDLY_FIRE,            "friendly_fire",        "1");
     CreateConVar2(CVAR_FLOAT,   SEARCH_DELAY,             "search_delay",         "5");
-    CreateConVar2(CVAR_FLOAT,   SEARCH_MIN_VEL,           "search_min_vel",       "800");
-    CreateConVar2(CVAR_FLOAT,   SEARCH_MAX_VEL,           "search_max_vel",       "2000");
-    CreateConVar2(CVAR_FLOAT,   SEARCH_MIN_Z_VEL,         "search_min_z_vel",     "200");
-    CreateConVar2(CVAR_FLOAT,   SEARCH_MAX_Z_VEL,         "search_max_z_vel",     "600");
-    CreateConVar2(CVAR_INT,     SEARCH_NO_GROUND,         "search_no_ground",     "1");
-    CreateConVar2(CVAR_FLOAT,   SEARCH_MIN_DIST,          "search_min_dist",      "500");
-    CreateConVar2(CVAR_FLOAT,   SEARCH_GROUND_RATIO,      "search_ground_ratio",  "1.75");
-    CreateConVar2(CVAR_FLOAT,   POINT_GROUND_RATIO,       "point_ground_ratio",   "1.75");
 }
 
 stock void CreateConVar2(int iCvarType, int iCvarId, const char[] cvarName, const char[] cvarValue)
@@ -102,8 +83,18 @@ stock void CreateConVar2(int iCvarType, int iCvarId, const char[] cvarName, cons
 
 public void OnConVarChanged_Int(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
+    //int iOldValue = StringToInt(oldValue);
+    //int iNewValue = StringToInt(newValue);
     int iCvarId = GetConVarIndex_Int(cvar);
     CVarsCacheInt[iCvarId] = CVarsInt[iCvarId].IntValue;
+
+    switch(iCvarId)
+    {
+        case FRIENDLY_FIRE:
+        {
+            FF_Update();
+        }
+    }
 }
 
 public void OnConVarChanged_Float(ConVar cvar, const char[] oldValue, const char[] newValue)

@@ -2,19 +2,16 @@ enum struct SpawnPointData
 {
     int Id;
     float Position[3];
-    float Velocity[3];
     float Angles[3];
     bool OnGround;
 }
 
 StringMap Points;
-StringMap DelPoints;
 
-int LoadedPoints, NextPointID;
+int NextPointID;
 
 stock void Point_OnMapEnd()
 {
-    LoadedPoints = 0;
     NextPointID = 0;
     Points.Clear();
 }
@@ -22,7 +19,6 @@ stock void Point_OnMapEnd()
 stock void Point_DataInit()
 {
     Points = new StringMap();
-    DelPoints = new StringMap();
 }
 
 stock void Point_AddPoint(SpawnPointData point)
@@ -66,9 +62,7 @@ stock void Point_LoadPoints()
         iId = StringToInt(szBuffer);
 
         hKeyValues.GetVector("Position", point.Position);
-        hKeyValues.GetVector("Velocity", point.Velocity);
         hKeyValues.GetVector("Angles", point.Angles);
-        point.OnGround = !!(hKeyValues.GetNum("OnGround"));
         IntToString(iCount++, szBuffer, 256);
         Points.SetArray(szBuffer, point, sizeof(point));
         DebugMessage(szBuffer)
@@ -78,22 +72,26 @@ stock void Point_LoadPoints()
         }
     }
     while(hKeyValues.GotoNextKey());
-
+    
     NextPointID = iMaxID + 1;
+    delete hKeyValues;
 }
 
 stock void Point_TeleportClient(int iClient, SpawnPointData point)
 {
-    TeleportEntity(iClient, point.Position, point.Angles, point.OnGround ? NULL_VECTOR:point.Velocity);
+    TeleportEntity(iClient, point.Position, point.Angles, NULL_VECTOR);
 }
 
 stock void Point_TeleportClientToRandomPoint(int iClient)
 {
     static char szBuffer[16];
-    IntToString(GetRandomInt(0, Points.Size - 1), szBuffer, 16);
-    SpawnPointData point;
-    if(Points.GetArray(szBuffer, point, 16))
+    if(GetConVarBool2(ENABLE) && Points.Size >= GetConVarInt2(MIN_POINTS))
     {
-        Point_TeleportClient(iClient, point);
+        IntToString(GetRandomInt(0, Points.Size - 1), szBuffer, 16);
+        SpawnPointData point;
+        if(Points.GetArray(szBuffer, point, 16))
+        {
+            Point_TeleportClient(iClient, point);
+        }
     }
 }

@@ -1,5 +1,6 @@
 #include <sourcemod>
 #include <sdktools_entinput>
+#include <sdktools_functions>
 #include <cstrike>
 
 #pragma newdecls required
@@ -159,7 +160,7 @@ public Action Timer_WeaponCleaner(Handle hTimer)
 void InsertWeapon(int iWeapon, bool bDrop = false)
 {
 	if(	!IsValidEntity(iWeapon) || 
-		GetEntPropEnt(iWeapon, Prop_Data, "m_hOwnerEntity") != -1 || 
+		(!bDrop && GetEntPropEnt(iWeapon, Prop_Data, "m_hOwnerEntity") != -1) || 
 		(Flags & IGNORE_SPECIAL_WEAPONS && GetEntProp(iWeapon, Prop_Data, "m_iHammerID")) ||
 		(Flags & IGNORE_C4 && Weapon_IsC4(iWeapon)))	
 			return;
@@ -232,13 +233,8 @@ bool RemoveWeapon(int iWeapon, bool bForce = false)
 
 public Action CS_OnCSWeaponDrop(int client, int weaponIndex)
 {
-	RequestFrame(OnWeaponDropped, weaponIndex);
+	InsertWeapon(weaponIndex, true);
 	return Plugin_Continue;
-}
-
-public void OnWeaponDropped(int weapon)
-{
-	InsertWeapon(weapon, true);
 }
 
 void ClearWeapons()

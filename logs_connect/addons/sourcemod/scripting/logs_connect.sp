@@ -29,7 +29,12 @@ public void OnMapEnd()
 void BuildLogFilePath()
 {
 	char szBuffer[256];
-	FormatTime(szBuffer, 367, "logs/connects_%Y-%m-%d.log");
+	BuildPath(Path_SM, szBuffer, sizeof(szBuffer), "logs/connects/");
+	if(!DirExists(szBuffer) && !CreateDirectory(szBuffer, 511))
+	{
+		SetFailState("Cant create directory \"%s\"", szBuffer);
+	}
+	FormatTime(szBuffer, 367, "logs/connects/connects_%Y-%m-%d.log");
 	BuildPath(Path_SM, szBuffer, 256, szBuffer);
 	if((LogFile = OpenFile(szBuffer, "a+")) == null)
 	{

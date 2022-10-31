@@ -1,8 +1,5 @@
 StringMap SearchPoints;
 
-int SearchGroundPoints;
-int SearchNoGroundPoints;
-
 Handle TimerSearch;
 
 stock void Search_DataInit()
@@ -15,7 +12,7 @@ stock void Search_TimerInit()
     DebugMessage("Search_TimerInit")
     delete TimerSearch;
     
-    if(GetConVarBool2(SEARCH))
+    if(GetConVarBool2(ENABLE) && GetConVarBool2(SEARCH))
     {
         float fDelay = GetConVarFloat2(SEARCH_DELAY);
         if(fDelay > 0.0)
@@ -52,7 +49,16 @@ stock void Search_SavePoints()
     KeyValues hKeyValues = new KeyValues("SpawnPoints");
     if(!hKeyValues.ImportFromFile(szDataFile))
     {
-        return;
+        BuildPath(Path_SM, szDataFile, 256, "data/rsp/template.txt");
+        hKeyValues = new KeyValues("SpawnPoints");
+        if(hKeyValues.ImportFromFile(szDataFile))
+        {
+            BuildPath(Path_SM, szDataFile, 256, "data/rsp/%s.txt", szBuffer);
+        }
+        else
+        {
+            return;
+        }
     }
     int iSavedPoints;
     SpawnPointData point;
@@ -76,9 +82,7 @@ stock void Search_SavePoints()
         if(hKeyValues.JumpToKey(szBuffer, true))
         {
             hKeyValues.SetVector("Position", point.Position);
-            hKeyValues.SetVector("Velocity", point.Velocity);
             hKeyValues.SetVector("Angles", point.Angles);
-            hKeyValues.SetNum("OnGround", view_as<int>(point.OnGround));
             hKeyValues.GoBack();
             iSavedPoints++;
         }
@@ -99,22 +103,24 @@ public Action Timer_Search(Handle hTimer)
 {
     DebugMessage("Timer_Search")
     
+    if(!GetConVarBool2(SEARCH))
+    {
+        return Plugin_Stop;
+    }
+    if(Points.Size + SearchPoints.Size > GetConVarInt2(MAX_POINTS))
+    {
+        return Plugin_Stop;
+    }
+    
+    FF_Update();
     SpawnPointData point;
     static float fPosition[3];
     static float fAngles[3];
-    static float fVelocity[3];
-    static bool bOnGround;
     for(int i = 1; i <= MaxClients; i++)
     {
-        if(!IsClientInGame(i) || !IsPlayerAlive(i))
+        if(!IsClientInGame(i) || !IsPlayerAlive(i) || !(GetEntityFlags(i) & FL_ONGROUND) || GetEntPropEnt(i, Prop_Send, "m_hGroundEntity") > 0)
             continue;
 
-        bOnGround = !!(GetEntityFlags(i) & FL_ONGROUND);
-
-        if(!Search_IsPointGroundValid(bOnGround))
-        {
-            continue;
-        }
         GetEntPropVector(i, Prop_Data, "m_vecOrigin", fPosition);
         if(!Search_IsPointPositionValid(fPosition))
         {
@@ -123,8 +129,6 @@ public Action Timer_Search(Handle hTimer)
 
         point.Position = fPosition;
         point.Angles = fAngles;
-        point.Velocity = fVelocity;
-        point.OnGround = bOnGround;
         Point_AddPoint(point);
         Search_AddPoint(point);
     }
@@ -140,14 +144,16 @@ stock void Search_AddPoint(SpawnPointData point)
     SearchPoints.SetArray(szBuffer, point, sizeof(point));
 }
 
-stock bool Search_IsPointPositionValid(float fPosition[3], bool bCall = true)
+stock bool Search_IsPointPositionValid(float fPosition[3], StringMap points = null)
 {
+    if(points == null)
+    {
+        return (Search_IsPointPositionValid(fPosition, Points) && Search_IsPointPositionValid(fPosition, SearchPoints));
+    }
+
     char szBuffer[16];
     SpawnPointData point;
-    //StringMapSnapshot snapshot;
-    //snapshot = bCall ? (Points.Snapshot()):(SearchPoints.Snapshot());
-    StringMap points = bCall ? Points:SearchPoints;
-    float fDistance = GetConVarFloat2(bCall ? POINT_MIN_DIST:SEARCH_MIN_DIST);
+    float fDistance = GetConVarFloat2(POINT_MIN_DIST);
     int iLength = points.Size;
     for(int i; i < iLength; i++)
     {
@@ -162,15 +168,5 @@ stock bool Search_IsPointPositionValid(float fPosition[3], bool bCall = true)
             return false;
     }
 
-    return bCall ? Search_IsPointPositionValid(fPosition, false):true;
-}
-
-stock bool Search_IsPointGroundValid(bool bOnGround)
-{
-    return (bOnGround || Search_GetGroundPointsRatio() < GetConVarFloat2(SEARCH_GROUND_RATIO));
-}
-
-stock float Search_GetGroundPointsRatio()
-{
-    return float(SearchGroundPoints) / float(SearchNoGroundPoints);
+    return true;
 }

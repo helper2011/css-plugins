@@ -1,4 +1,5 @@
 #include <sourcemod>
+#include <sdktools_entinput>
 
 #pragma newdecls required
 
@@ -21,6 +22,14 @@ public void OnPlayerDeath(Event hEvent, const char[] szName, bool bDontBroadcast
 	int iRagdoll = GetEntPropEnt(GetClientOfUserId(hEvent.GetInt("userid")), Prop_Send, "m_hRagdoll");
 	if(iRagdoll && IsValidEdict(iRagdoll))
 	{
-		RemoveEntity(iRagdoll);
+		RequestFrame(RemoveRagdoll, EntIndexToEntRef(iRagdoll));
+	}
+}
+
+void RemoveRagdoll(int iEntity)
+{
+	if((iEntity = EntRefToEntIndex(iEntity)) != INVALID_ENT_REFERENCE)
+	{
+		RemoveEntity(iEntity);
 	}
 }

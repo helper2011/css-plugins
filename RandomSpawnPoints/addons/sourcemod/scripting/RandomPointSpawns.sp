@@ -1,14 +1,15 @@
 #include <sourcemod>
 #include <sdktools>
 
-#define DEBUG 1
-#define DEBUG_ADV 1
+#define DEBUG 0
+#define DEBUG_ADV 0
 
 #pragma newdecls required
 
 #include "rsp/debug.sp"
 #include "rsp/convars.sp"
 #include "rsp/point.sp"
+#include "rsp/ff.sp"
 #include "rsp/search.sp"
 #include "rsp/commands.sp"
 
@@ -35,6 +36,7 @@ public void OnPluginStart()
     Point_DataInit();
     Search_DataInit();
     HookEvent("player_spawn", OnPlayerSpawn_Pre, EventHookMode_Pre);
+    AutoExecConfig(true, "plugin.RandomSpawnPoints");
 }
 
 public void OnPluginEnd()
@@ -43,8 +45,6 @@ public void OnPluginEnd()
 
     OnMapEnd();
 }
-
-
 
 public void OnMapStart()
 {
