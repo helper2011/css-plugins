@@ -5,8 +5,8 @@ char Group[64];
 bool Enable, MapIsEnd;
 int Winner[MAXPLAYERS + 1], Winners, Admin, Time, MinRoundTime, Vips;
 
-static const int	iTimes[] = {	86400,		259200,		604800,		2629743,	7889232,	15778463,		31556926};
-static const char	szTimes[][] = {	"1 День",	"3 Дня",	"1 Неделя",	"1 Месяц",	"3 месяца",	"6 месяцев",	"1 Год"};
+static const int	iTimes[] = {	86400,		172800, 259200,		604800,		2629743,	7889232,	15778463,		31556926};
+static const char	szTimes[][] = {	"1 День",	"2 Дня", "3 Дня",	"1 Неделя",	"1 Месяц",	"3 месяца",	"6 месяцев",	"1 Год"};
 
 public Plugin myinfo = 
 {

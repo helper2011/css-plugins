@@ -208,7 +208,7 @@ public void OnMapEnd()
 	int iCount;
 	char szBuffer[256];
 	KeyValues hKeyValues = new KeyValues("ChristmasLights");
-	do
+	while(iCount < Lights)
 	{
 		IntToString(iCount, szBuffer, 256);
 		if(hKeyValues.JumpToKey(szBuffer, true))
@@ -222,7 +222,6 @@ public void OnMapEnd()
 		iCount++;
 	
 	}
-	while(iCount < Lights);
 	GetCurrentMap(szBuffer, 256);
 	BuildPath(Path_SM, szBuffer, 256, "configs/christmas_lights/%s.cfg", szBuffer);
 	hKeyValues.Rewind();
@@ -250,6 +249,7 @@ stock void CreateLight(int iLight)
 		DispatchKeyValue(iEntity, "spawnflags", "1");
 		DispatchKeyValue(iEntity, "scale", "0.5");
 		DispatchKeyValue(iEntity, "rendermode", "9");
+		DispatchKeyValue(iEntity, "framerate", "0");
 		DispatchKeyValue(iEntity, "model", "sprites/glow02.vmt");
 		DispatchKeyValue(iEntity, "rendercolor", colors);
 		DispatchSpawn(iEntity);
@@ -305,7 +305,7 @@ void TraceEye(int client, float pos[3])
 
 stock void DrawLights(const float startpoint[3], const float endpoint[3])
 {
-	PrintToConsoleAll("DrawLights");
+	//PrintToConsoleAll("DrawLights");
 	float direction[3], starting[3];
 	
 	starting[0] = startpoint[0];

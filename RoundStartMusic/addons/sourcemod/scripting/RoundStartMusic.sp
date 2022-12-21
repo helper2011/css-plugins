@@ -30,13 +30,13 @@ public void OnPluginStart()
 	{
 		SetFailState("Cant find russian language (see languages.cfg)");
 	}
-	Path = CreateConVar("rsm_path", "sexwbhop/rsm/");
+	Path = CreateConVar("rsm_path", "sexwbhop/deathrun/xmas2/rsm/");
 	CookieRsm = RegClientCookie("Rsm", "", CookieAccess_Private);
 	RegConsoleCmd("sm_rsm", Command_Rsm);
 	RegServerCmd("rsm_reload", Command_RsmReload);
 	HookEvent("round_start", OnRoundStart, EventHookMode_PostNoCopy);
 	SetCookieMenuItem(RSMMenuHandler, 0, "Round Start Music");
-	
+	AutoExecConfig(true, "plugin.Rsm");
 	LoadSongs();
 	
 	for(int i = 1; i <= MaxClients; i++)

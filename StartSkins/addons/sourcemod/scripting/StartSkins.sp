@@ -11,8 +11,10 @@ int Team[2][MAX_SKINS];
 bool AdvertNick[MAXPLAYERS + 1];
 
 ConVar cvarMode;
+ConVar cvarDelay;
 
 int Mode;
+float Delay;
 
 static const char AdvertWords[][] = 
 {
@@ -35,9 +37,12 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	cvarDelay = CreateConVar("sm_start_skins_delay", "0.1");
 	cvarMode = CreateConVar("sm_start_skins_mode", "0", "0 - some teams, 1 - random");
 	cvarMode.AddChangeHook(OnConVarChange);
+	cvarDelay.AddChangeHook(OnConVarChange);
 	Mode = cvarMode.IntValue;
+	Delay = cvarDelay.FloatValue;
 	AutoExecConfig(true, "plugin.StartSkins");
 	
 	LoadSkins(0);
@@ -102,21 +107,47 @@ void LoadSkins(int iType)
 
 public void OnConVarChange(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
-	Mode = cvar.IntValue;
-	
-	for(int i = 1; i <= MaxClients; i++)
+	if(cvar == cvarMode)
 	{
-		if(IsClientInGame(i))
+		Mode = cvar.IntValue;
+
+		for(int i = 1; i <= MaxClients; i++)
 		{
-			OnClientDisconnect(i);
-			OnClientPutInServer(i);
+			if(IsClientInGame(i))
+			{
+				OnClientDisconnect(i);
+				OnClientPutInServer(i);
+			}
 		}
+
+	}
+	else if(cvar == cvarDelay)
+	{
+		Delay = cvar.FloatValue;
 	}
 }
 
 public void OnPlayerSpawn(Event hEvent, const char[] szName, bool bDontBroadcast)
 {
-	RequestFrame(OnPlayerSpawnNextTick, GetClientOfUserId(hEvent.GetInt("userid")));
+	if(Delay <= 0.0)
+	{
+		RequestFrame(OnPlayerSpawnNextTick, GetClientOfUserId(hEvent.GetInt("userid")));
+	}
+	else
+	{
+		CreateTimer(Delay, Timer_OnPlayerSpawn, hEvent.GetInt("userid"));
+	}
+}
+
+public Action Timer_OnPlayerSpawn(Handle hTimer, int iUserId)
+{
+	int iClient = GetClientOfUserId(iUserId);
+	
+	if(iClient && IsClientInGame(iClient) && IsPlayerAlive(iClient))
+	{
+		SetClientSkin(iClient);
+	}
+	return Plugin_Continue;
 }
 
 void OnPlayerSpawnNextTick(int iClient)
@@ -124,6 +155,11 @@ void OnPlayerSpawnNextTick(int iClient)
 	if(!IsClientInGame(iClient) || !IsPlayerAlive(iClient))
 		return;
 		
+	SetClientSkin(iClient);
+}
+
+void SetClientSkin(int iClient)
+{
 	int iType = AdvertNick[iClient] ? 1:0;
 	
 	if(!Skins[iType])
@@ -152,8 +188,6 @@ void OnPlayerSpawnNextTick(int iClient)
 			SetEntityModel(iClient, Skin[iType][iSkins[GetRandomInt(0, iSkinsCount - 1)]]);
 		}
 	}
-
-	
 }
 
 public void OnClientPutInServer(int iClient)
